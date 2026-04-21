@@ -1,0 +1,14 @@
+.tmp
+.lnk
+.ini
+.icloud
+.onecache
+.sync
+OneDrive.log
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.httr-oauth
+.DS_Store
+.quarto

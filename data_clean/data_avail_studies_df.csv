@@ -1,0 +1,2 @@
+"","ref","article_id","study_id","participant_id","efN_id","dv_var","dv_type","dv_synonym","intent","in_action","RQ","harm","agent_intel","aiType_a","aiType_b","PMA","PMC","responsible","responsibleCat","humanN","humanMean","humanSD","aiN","aiMean","aiSD","aiN.1","aiN.0","humanN.1","humanN.0","escalc_result","yi","vi"
+"1","banks2021_s1",1,1,1,1,"good","continuous","good",NA,NA,59.5,"harm","notImplied","robot","humanoid","-0.241221738398021",NA,"-0.249494135653254","responsible",208,4.08653846153846,2.50452952729708,194,4.31443298969072,2.3389244988987,NA,NA,NA,NA,

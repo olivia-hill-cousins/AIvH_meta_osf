@@ -1,0 +1,5 @@
+_targets/
+
+
+# ignore all R Markdown files
+*.Rmd
