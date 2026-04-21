@@ -1,14 +1,14 @@
-.tmp
-.lnk
-.ini
-.icloud
-.onecache
-.sync
-OneDrive.log
-.Rproj.user
+# RStudio
+.Rproj.user/
 .Rhistory
 .RData
 .Ruserdata
-.httr-oauth
+
+# Temp files
+*.tmp
+.tmp/
+*.RDataTmp*
+
+# OS junk
 .DS_Store
-.quarto
+Thumbs.db
