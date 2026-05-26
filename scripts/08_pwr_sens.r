@@ -942,7 +942,7 @@ plot_main_mdes_results <- function(meta,
     )
 
   # ---- LABELS (ALSO USING SAME COLOUR SCALE) ----
-  p +
+  p<- p +
     geom_label_repel(
       data = mdes_labels,
       aes(x = final_mdes, y = y, label = label_text, fill = mod),
@@ -952,6 +952,18 @@ plot_main_mdes_results <- function(meta,
       size = 3,
       inherit.aes = FALSE
     )
+  
+  fig_save_name <- "figures/main_mdes_plot.png"
+  
+  png(
+    fig_save_name,
+    width = 3508,
+    height = 2480,
+    res = 300  
+  )
+  
+  print(p)
+  dev.off()
 }
 
 plot_mdes_results <- function(meta,
@@ -1133,7 +1145,7 @@ create_pwr_curve_for_all_mods <- function(meta) {
       ),
       direction = c("y"),
       xlim = c(-0.5, 0.7),
-      ylim = c(0.07, 1.15),
+      ylim = c(0.13, 1.13),
       alpha = 0.8,
       colour = "black",
       box.padding = 5,

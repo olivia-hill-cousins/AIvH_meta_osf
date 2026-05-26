@@ -131,3 +131,16 @@ remove_verified_outliers <- function(df) {
   write.csv(trimmed_df, "data_clean/trimmed_df.csv")
   trimmed_df
 }
+
+remove_conservative_verified_outliers <- function(df) {
+  # hard cut off
+  trimmed_df <- df 
+  # create trimmed
+  trimmed_df <- trimmed_df %>%
+    filter(ref != "meder2019_s1") %>%
+    filter(ref != "malle2016_s2") %>%
+    filter(ref != "hidalgo2021_s1")
+  
+  write.csv(trimmed_df, "data_clean/partial_trimmed_df.csv")
+  trimmed_df
+}

@@ -1,49 +1,15 @@
 # Load packages required to define the pipeline:
 library(targets)
-library(crew) # allows to use parallel processing to run these targets
 
 # Set target options:
 tar_option_set(
   packages = c(
     "tidyr", "haven", "dplyr", "psych", "effsize", "metafor", "readxl",
     "purrr", "stringr", "rlang", "ggplot2", "tidyverse", "performance",
-    "broom", "Hmisc", "flextable", "officer", "papaja", "labelled", "TOSTER",
+    "broom", "Hmisc", "flextable", "officer", "papaja", "labelled", "parameters",
     "forcats", "RColorBrewer", "jtools", "viridis", "ggrepel", "furrr", "grateful", "esc", "openxlsx", "ggplot2",
     "kableExtra", "car", "caret", "emmeans", "lme4", "lmerTest", "lsr", "patchwork", "sjstats", "showtext", "orchaRd", "ggrepel", "tibble"
-  ), # Packages that your targets need for their tasks.
-  # format = "qs", # Optionally set the default storage format. qs is fast.
-  #
-  # Pipelines that take a long time to run may benefit from
-  # optional distributed computing. To use this capability
-  # in tar_make(), supply a {crew} controller
-  # as discussed at https://books.ropensci.org/targets/crew.html.
-  # Choose a controller that suits your needs. For example, the following
-  # sets a controller that scales up to a maximum of two workers
-  # which run as local R processes. Each worker launches when there is work
-  # to do and exits if 60 seconds pass with no tasks to run.
-  #
-  #   controller = crew::crew_controller_local(workers = 2, seconds_idle = 60)
-  #
-  # Alternatively, if you want workers to run on a high-performance computing
-  # cluster, select a controller from the {crew.cluster} package.
-  # For the cloud, see plugin packages like {crew.aws.batch}.
-  # The following example is a controller for Sun Grid Engine (SGE).
-  #
-  #   controller = crew.cluster::crew_controller_sge(
-  #     # Number of workers that the pipeline can scale up to:
-  #     workers = 10,
-  #     # It is recommended to set an idle time so workers can shut themselves
-  #     # down if they are not running tasks.
-  #     seconds_idle = 120,
-  #     # Many clusters install R as an environment module, and you can load it
-  #     # with the script_lines argument. To select a specific verison of R,
-  #     # you may need to include a version string, e.g. "module load R/4.3.2".
-  #     # Check with your system administrator if you are unsure.
-  #     script_lines = "module load R"
-  #   )
-  #
-  # Set other options as needed.
-  controller = crew::crew_controller_local(workers = 4)
+  )
 )
 
 # Run the R scripts in the R/ folder with your custom functions:
@@ -427,6 +393,7 @@ list(
     format = "file"
   ),
   tar_target(trimmed_df, remove_verified_outliers(combined_df)),
+  tar_target(partial_trimmed_df, remove_conservative_verified_outliers(combined_df)), 
   ###########################
   # MAIN MODEL W. TRIMMED DATA
   ###########################
@@ -464,6 +431,12 @@ list(
   tar_target(pet_trimmed_model, fit_selected_model_structure(mod = ~ sqrt(vi), dat = trimmed_df)),
   ######## peese test
   tar_target(peese_trimmed_model, fit_selected_model_structure(mod = ~vi, dat = trimmed_df)),
+  
+  ############# partial trimmed model 
+  ########### pet test
+  tar_target(pet_partial_trimmed_model, fit_selected_model_structure(mod = ~ sqrt(vi), dat = partial_trimmed_df)),
+  ######## peese test
+  tar_target(peese_partial_trimmed_model, fit_selected_model_structure(mod = ~vi, dat = partial_trimmed_df)),
   ###########################
   # MODEL FIT
   ###########################
@@ -851,7 +824,6 @@ list(
   tar_target(trimmed_mods_pwr_curve_plot, create_pwr_curve_for_all_mods(trimmed_mdes_mods)),
   tar_target(full_mdes_plot_file, ggsave("figures/full_mdes_plot.png", full_mdes_plot, width = 8, height = 6, dpi = 300), format = "file"),
   tar_target(trimmed_mdes_plot_file, ggsave("figures/trimmed_mdes_plot.png", trimmed_mdes_plot, width = 8, height = 6, dpi = 300), format = "file"),
-  tar_target(main_mdes_plot_file, ggsave("figures/main_mdes_plot.png", main_mdes_plot, width = 8, height = 5, dpi = 300), format = "file"),
   tar_target(
     trimmed_mods_pwr_curve,
     {
@@ -865,9 +837,10 @@ list(
   # ###########################
   # CALCULATE TOAST
   ###########################
-  tar_target(fullToast, calc_main_toast(1, m_multi, mdes_main_full, "Full")),
-  tar_target(trimmedToast, calc_main_toast(1, m_multi_trimmed, mdes_main_trimmed, "Trimmed")),
-
+  tar_target(fullToast_mdes, calc_main_toast(1, m_multi, mdes_main_full, "Full")),
+  tar_target(trimmedToast_mdes, calc_main_toast(1, m_multi_trimmed, mdes_main_trimmed, "Trimmed")),
+  tar_target(fullToast, calc_main_toast_fixed_bounds(1, m_multi, 0.2, "Full")),
+  tar_target(trimmedToast, calc_main_toast_fixed_bounds(1, m_multi_trimmed, 0.2, "Trimmed")),
   #### Full Data
   ### Categorical Moderators
   # Harm
@@ -920,18 +893,18 @@ list(
   tar_target(fullToast_dv_synonym_wrong, calc_toast("wrong", dv_synonym_mv, mdes_dv_synonym_wrong, "Full DV Synonym Wrong", "dv_synonym")),
 
   ### continuous
-  tar_target(fullToast_pma, calc_toast_cont(pma_mv, mdes_PMA, "Full PMA")),
-  tar_target(fullToast_pmc, calc_toast_cont(pmc_mv, mdes_PMC, "Full PMC")),
-  tar_target(fullToast_responsible, calc_toast_cont(responsible_mv, mdes_responsible, "Full Responsible")),
-  tar_target(fullToast_rq, calc_toast_cont(rq_mv, mdes_RQ, "Full RQ")),
+  tar_target(fullToast_pma, calc_toast_cont(combined_df,"PMA",pma_mv, mdes_PMA, "Full PMA")),
+  tar_target(fullToast_pmc, calc_toast_cont(combined_df,"PMC",pmc_mv, mdes_PMC, "Full PMC")),
+  tar_target(fullToast_responsible, calc_toast_cont(combined_df,"responsible", responsible_mv, mdes_responsible, "Full Responsible")),
+  tar_target(fullToast_rq, calc_toast_cont(combined_df,"RQ", rq_mv, mdes_RQ, "Full RQ")),
 
   ### Multiple Regression Models
-  tar_target(fullToast_intent_in_action_ise, calc_toast_for_multi_reg("sidee", intent_in_action_mv, mdes_intent_in_action_ise, "Trimmed MD SE", "intent")),
-  tar_target(fullToast_intent_in_action_ime, calc_toast_for_multi_reg("meane", intent_in_action_mv, mdes_intent_in_action_ise, "Trimmed MD ME", "intent")),
-  tar_target(fullToast_intent_in_action_mdi, calc_toast_for_multi_reg("inaction", intent_in_action_mv, mdes_intent_in_action_mdi, "Trimmed I MDI", "in_action")),
-  tar_target(fullToast_intent_in_action_mda, calc_toast_for_multi_reg("action", intent_in_action_mv, mdes_intent_in_action_mda, "Trimmed I MDA", "in_action")),
+  tar_target(fullToast_intent_in_action_ise, calc_toast_for_multi_reg(combined_df, "sidee", mdes_intent_in_action_ise, "intent", c("intent","in_action"), c("cat","cat"), "cat")),
+  tar_target(fullToast_intent_in_action_ime, calc_toast_for_multi_reg(combined_df, "meane", mdes_intent_in_action_ise, "intent", c("intent","in_action"), c("cat","cat"), "cat")),
+  tar_target(fullToast_intent_in_action_mdi, calc_toast_for_multi_reg(combined_df, "inaction", mdes_intent_in_action_mdi, "in_action", c("intent","in_action"), c("cat","cat"), "cat")),
+  tar_target(fullToast_intent_in_action_mda, calc_toast_for_multi_reg(combined_df, "action", mdes_intent_in_action_mda, "in_action", c("intent","in_action"), c("cat","cat"), "cat")),
   # ## Responsible Cat Levels x Responsible
-  tar_target(fullToast_responsible_with_catLvls, calc_toast_cont(responsibleCat_responsible_mv, mdes_responsible_with_catLvls, "Trimmed Responsible with Cat Levels")),
+  tar_target(fullToast_responsible_with_catLvls, calc_toast_cont(combined_df,"responsible",responsibleCat_responsible_mv, mdes_responsible_with_catLvls, "Trimmed Responsible with Cat Levels")),
   #
   #### Trimmed Data
   ### Categorical Moderators
@@ -985,18 +958,18 @@ list(
   tar_target(trimmedToast_dv_synonym_wrong, calc_toast("wrong", dv_synonym_trimmed_mv, trimmed_mdes_dv_synonym_wrong, "Trimmed DV Synonym Wrong", "dv_synonym")),
 
   ### continuous
-  tar_target(trimmedToast_pma, calc_toast_cont(pma_trimmed_mv, trimmed_mdes_PMA, "Trimmed PMA")),
-  tar_target(trimmedToast_pmc, calc_toast_cont(pmc_trimmed_mv, trimmed_mdes_PMC, "Trimmed PMC")),
-  tar_target(trimmedToast_responsible, calc_toast_cont(responsible_trimmed_mv, trimmed_mdes_responsible, "Trimmed Responsible")),
-  tar_target(trimmedToast_rq, calc_toast_cont(rq_trimmed_mv, trimmed_mdes_RQ, "Trimmed RQ")),
+  tar_target(trimmedToast_pma, calc_toast_cont(trimmed_df,"PMA",pma_trimmed_mv, trimmed_mdes_PMA, "Trimmed PMA")),
+  tar_target(trimmedToast_pmc, calc_toast_cont(trimmed_df,"PMC",pmc_trimmed_mv, trimmed_mdes_PMC, "Trimmed PMC")),
+  tar_target(trimmedToast_responsible, calc_toast_cont(trimmed_df,"responsible",responsible_trimmed_mv, trimmed_mdes_responsible, "Trimmed Responsible")),
+  tar_target(trimmedToast_rq, calc_toast_cont(trimmed_df,"RQ",rq_trimmed_mv, trimmed_mdes_RQ, "Trimmed RQ")),
 
   ### Multiple Regression Models
-  tar_target(trimmedToast_intent_in_action_ise, calc_toast_for_multi_reg("sidee", intent_in_action_trimmed_mv, trimmed_mdes_intent_in_action_ise, "Trimmed MD SE", "intent")),
-  tar_target(trimmedToast_intent_in_action_ime, calc_toast_for_multi_reg("meane", intent_in_action_trimmed_mv, trimmed_mdes_intent_in_action_ise, "Trimmed MD ME", "intent")),
-  tar_target(trimmedToast_intent_in_action_mdi, calc_toast_for_multi_reg("inaction", intent_in_action_trimmed_mv, trimmed_mdes_intent_in_action_mdi, "Trimmed I MDI", "in_action")),
-  tar_target(trimmedToast_intent_in_action_mda, calc_toast_for_multi_reg("action", intent_in_action_trimmed_mv, trimmed_mdes_intent_in_action_mda, "Trimmed I MDA", "in_action")),
+  tar_target(trimmedToast_intent_in_action_ise, calc_toast_for_multi_reg(trimmed_df, "sidee",  trimmed_mdes_intent_in_action_ise, "intent", c("intent","in_action"), c("cat","cat"), "cat")),
+  tar_target(trimmedToast_intent_in_action_ime, calc_toast_for_multi_reg(trimmed_df,"meane",  trimmed_mdes_intent_in_action_ise, "intent", c("intent","in_action"), c("cat","cat"), "cat")),
+  tar_target(trimmedToast_intent_in_action_mdi, calc_toast_for_multi_reg(trimmed_df,"inaction",  trimmed_mdes_intent_in_action_mdi, "in_action", c("intent","in_action"), c("cat","cat"), "cat")),
+  tar_target(trimmedToast_intent_in_action_mda, calc_toast_for_multi_reg(trimmed_df, "action", trimmed_mdes_intent_in_action_mda, "in_action", c("intent","in_action"), c("cat","cat"), "cat")),
   ## Responsible Cat Levels x Responsible
-  tar_target(trimmedToast_responsible_with_catLvls, calc_toast_cont(responsibleCat_responsible_trimmed_mv, trimmed_mdes_responsible_with_catLvls, "Trimmed Responsible with Cat Levels")),
+  tar_target(trimmedToast_responsible_with_catLvls, calc_toast_cont(trimmed_df,"responsible",responsibleCat_responsible_trimmed_mv, trimmed_mdes_responsible_with_catLvls, "Trimmed Responsible with Cat Levels")),
 
   ###########################
   # TABLES
@@ -1106,5 +1079,9 @@ list(
   tar_target(aiTypeB_orchard_plot_trimmed, create_orchard_plot_for_cat_mods(aiType_b_trimmed_mv, "aiType_b", "aiTypeB_orchard_plot_trimmed")),
   tar_target(agent_intel_orchard_plot_trimmed, create_orchard_plot_for_cat_mods(agent_intel_trimmed_mv, "agent_intel", "agent_intel_orchard_plot_trimmed")),
   tar_target(dv_synonym_orchard_plot_trimmed, create_orchard_plot_for_cat_mods(dv_synonym_trimmed_mv, "dv_synonym", "dv_synonym_orchard_plot_trimmed")),
-  tar_target(responsible_with_cat_orchard_plot_trimmed, create_orchard_plot_for_cat_mods(responsibleCat_responsible_trimmed_mv, "responsibleCat", "responsible_with_cat_orchard_plot_trimmed"))
+  tar_target(responsible_with_cat_orchard_plot_trimmed, create_orchard_plot_for_cat_mods(responsibleCat_responsible_trimmed_mv, "responsibleCat", "responsible_with_cat_orchard_plot_trimmed")),
+  tar_target(total_group_Ns_full, calculate_total_and_group_Ns(data_studies_df, inf_manual_data_df)),
+  tar_target(total_group_Ns_trimmed, calculate_total_and_group_Ns_for_trimmed(data_studies_df, inf_manual_data_df)),
+  tar_target(min_max_Ns_full, calculate_per_study_N_ranges_full(data_studies_df, inf_manual_data_df)),
+  tar_target(min_max_Ns_trimmed, calculate_per_study_N_ranges_trimmed(data_studies_df, inf_manual_data_df))
 )

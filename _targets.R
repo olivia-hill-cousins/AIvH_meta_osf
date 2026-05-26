@@ -6,7 +6,7 @@ tar_option_set(
   packages = c(
     "tidyr", "haven", "dplyr", "psych", "effsize", "metafor", "readxl",
     "purrr", "stringr", "rlang", "ggplot2", "tidyverse", "performance",
-    "broom", "Hmisc", "flextable", "officer", "papaja", "labelled", "TOSTER",
+    "broom", "Hmisc", "flextable", "officer", "papaja", "labelled", "parameters",
     "forcats", "RColorBrewer", "jtools", "viridis", "ggrepel", "furrr", "grateful", "esc", "openxlsx", "ggplot2",
     "kableExtra", "car", "caret", "emmeans", "lme4", "lmerTest", "lsr", "patchwork", "sjstats", "showtext", "orchaRd", "ggrepel", "tibble"
   )
@@ -14,10 +14,11 @@ tar_option_set(
 
 # Run the R scripts in the R/ folder with your custom functions:
 tar_source("scripts")
-# tar_source("other_functions.R") # Source other scripts as needed.
 
-# Replace the target list below with your own:
 list(
+  # read in files that cannot be openly shared
+  tar_target(data_studies_df, readRDS("outputs/data_studies_df.rds")),
+  tar_target(inf_manual_data_df, readRDS("outputs/inf_manual_data_df.rds")),
   tar_target(full_df, read_clean_data("data_clean/full_data.csv")),
   tar_target(
     overall_studies_csv,
@@ -121,6 +122,8 @@ list(
     format = "file"
   ),
   tar_target(trimmed_df, remove_verified_outliers(full_df)),
+  tar_target(partial_trimmed_df, remove_conservative_verified_outliers(full_df)), 
+  
   ###########################
   # MAIN MODEL W. TRIMMED DATA
   ###########################
@@ -158,6 +161,13 @@ list(
   tar_target(pet_trimmed_model, fit_selected_model_structure(mod = ~ sqrt(vi), dat = trimmed_df)),
   ######## peese test
   tar_target(peese_trimmed_model, fit_selected_model_structure(mod = ~vi, dat = trimmed_df)),
+  
+  ############# partial trimmed model 
+  ########### pet test
+  tar_target(pet_partial_trimmed_model, fit_selected_model_structure(mod = ~ sqrt(vi), dat = partial_trimmed_df)),
+  ######## peese test
+  tar_target(peese_partial_trimmed_model, fit_selected_model_structure(mod = ~vi, dat = partial_trimmed_df)),
+  
   ###########################
   # MODEL FIT
   ###########################
@@ -553,9 +563,10 @@ list(
   # ###########################
   # CALCULATE TOAST
   ###########################
-  tar_target(fullToast, calc_main_toast(1, m_multi, mdes_main_full, "Full")),
-  tar_target(trimmedToast, calc_main_toast(1, m_multi_trimmed, mdes_main_trimmed, "Trimmed")),
-
+  tar_target(fullToast_mdes, calc_main_toast(1, m_multi, mdes_main_full, "Full")),
+  tar_target(trimmedToast_mdes, calc_main_toast(1, m_multi_trimmed, mdes_main_trimmed, "Trimmed")),
+  tar_target(fullToast, calc_main_toast_fixed_bounds(1, m_multi, 0.2, "Full")),
+  tar_target(trimmedToast, calc_main_toast_fixed_bounds(1, m_multi_trimmed, 0.2, "Trimmed")),
   #### Full Data
   ### Categorical Moderators
   # Harm
@@ -563,7 +574,7 @@ list(
   tar_target(fullToast_harm_harm, calc_toast("harm", harm_mv, mdes_harm_harm, "Full Harm", "harm")),
   # notharm level
   tar_target(fullToast_harm_notharm, calc_toast("notharm", harm_mv, mdes_harm_notharm, "Full Not Harm", "harm")),
-
+  
   ## Intent
   # meane level
   tar_target(fullToast_intent_meane, calc_toast("meane", intent_mv, mdes_intent_meane, "Full Intent Mean-Effect", "intent")),
@@ -575,7 +586,7 @@ list(
   tar_target(fullToast_in_action_action, calc_toast("action", in_action_mv, mdes_in_action_action, "Full In-Action Action", "in_action")),
   # inaction level
   tar_target(fullToast_in_action_inaction, calc_toast("inaction", in_action_mv, mdes_in_action_inaction, "Full In-Action Inaction", "in_action")),
-
+  
   ## AI Type A (AI vs. Robot)
   ## AI level
   tar_target(fullToast_aiTypeA_ai, calc_toast("AI", aiType_a_mv, mdes_aiTypeA_ai, "Full AI Type A AI", "aiType_a")),
@@ -589,13 +600,13 @@ list(
   tar_target(fullToast_aiTypeB_mechanical, calc_toast("mechanical", aiType_b_mv, mdes_aiTypeB_mechanical, "Full AI Type B Mechanical Robot", "aiType_b")),
   # Humanoid Robot level
   tar_target(fullToast_aiTypeB_humanoid, calc_toast("humanoid", aiType_b_mv, mdes_aiTypeB_humanoid, "Full AI Type B Humanoid Robot", "aiType_b")),
-
+  
   #  ## Agent Intelligence
   # # Implied level
   tar_target(fullToast_agent_intel_implied, calc_toast("implied", agent_intel_mv, mdes_agent_intel_implied, "Full Agent Intelligence Implied", "agent_intel")),
   # Not Implied level
   tar_target(fullToast_agent_intel_notImplied, calc_toast("notImplied", agent_intel_mv, mdes_agent_intel_notImplied, "Full Agent Intelligence Not Implied", "agent_intel")),
-
+  
   # DV synonym ("acceptable", "appropriate", "good", "justifiable", "moral", "permissible", "right", "unethical",  "wrong")
   tar_target(fullToast_dv_synonym_acceptable, calc_toast("acceptable", dv_synonym_mv, mdes_dv_synonym_acceptable, "Full DV Synonym Acceptable", "dv_synonym")),
   tar_target(fullToast_dv_synonym_appropriate, calc_toast("appropriate", dv_synonym_mv, mdes_dv_synonym_appropriate, "Full DV Synonym Appropriate", "dv_synonym")),
@@ -606,20 +617,20 @@ list(
   tar_target(fullToast_dv_synonym_right, calc_toast("right", dv_synonym_mv, mdes_dv_synonym_right, "Full DV Synonym Right", "dv_synonym")),
   tar_target(fullToast_dv_synonym_unethical, calc_toast("unethical", dv_synonym_mv, mdes_dv_synonym_unethical, "Full DV Synonym Unethical", "dv_synonym")),
   tar_target(fullToast_dv_synonym_wrong, calc_toast("wrong", dv_synonym_mv, mdes_dv_synonym_wrong, "Full DV Synonym Wrong", "dv_synonym")),
-
+  
   ### continuous
-  tar_target(fullToast_pma, calc_toast_cont(pma_mv, mdes_PMA, "Full PMA")),
-  tar_target(fullToast_pmc, calc_toast_cont(pmc_mv, mdes_PMC, "Full PMC")),
-  tar_target(fullToast_responsible, calc_toast_cont(responsible_mv, mdes_responsible, "Full Responsible")),
-  tar_target(fullToast_rq, calc_toast_cont(rq_mv, mdes_RQ, "Full RQ")),
-
+  tar_target(fullToast_pma, calc_toast_cont(full_df,"PMA",pma_mv, mdes_PMA, "Full PMA")),
+  tar_target(fullToast_pmc, calc_toast_cont(full_df,"PMC",pmc_mv, mdes_PMC, "Full PMC")),
+  tar_target(fullToast_responsible, calc_toast_cont(full_df,"responsible", responsible_mv, mdes_responsible, "Full Responsible")),
+  tar_target(fullToast_rq, calc_toast_cont(full_df,"RQ", rq_mv, mdes_RQ, "Full RQ")),
+  
   ### Multiple Regression Models
-  tar_target(fullToast_intent_in_action_ise, calc_toast_for_multi_reg("sidee", intent_in_action_mv, mdes_intent_in_action_ise, "Trimmed MD SE", "intent")),
-  tar_target(fullToast_intent_in_action_ime, calc_toast_for_multi_reg("meane", intent_in_action_mv, mdes_intent_in_action_ise, "Trimmed MD ME", "intent")),
-  tar_target(fullToast_intent_in_action_mdi, calc_toast_for_multi_reg("inaction", intent_in_action_mv, mdes_intent_in_action_mdi, "Trimmed I MDI", "in_action")),
-  tar_target(fullToast_intent_in_action_mda, calc_toast_for_multi_reg("action", intent_in_action_mv, mdes_intent_in_action_mda, "Trimmed I MDA", "in_action")),
+  tar_target(fullToast_intent_in_action_ise, calc_toast_for_multi_reg(full_df, "sidee", mdes_intent_in_action_ise, "intent", c("intent","in_action"), c("cat","cat"), "cat")),
+  tar_target(fullToast_intent_in_action_ime, calc_toast_for_multi_reg(full_df, "meane", mdes_intent_in_action_ise, "intent", c("intent","in_action"), c("cat","cat"), "cat")),
+  tar_target(fullToast_intent_in_action_mdi, calc_toast_for_multi_reg(full_df, "inaction", mdes_intent_in_action_mdi, "in_action", c("intent","in_action"), c("cat","cat"), "cat")),
+  tar_target(fullToast_intent_in_action_mda, calc_toast_for_multi_reg(full_df, "action", mdes_intent_in_action_mda, "in_action", c("intent","in_action"), c("cat","cat"), "cat")),
   # ## Responsible Cat Levels x Responsible
-  tar_target(fullToast_responsible_with_catLvls, calc_toast_cont(responsibleCat_responsible_mv, mdes_responsible_with_catLvls, "Trimmed Responsible with Cat Levels")),
+  tar_target(fullToast_responsible_with_catLvls, calc_toast_cont(full_df,"responsible",responsibleCat_responsible_mv, mdes_responsible_with_catLvls, "Trimmed Responsible with Cat Levels")),
   #
   #### Trimmed Data
   ### Categorical Moderators
@@ -628,7 +639,7 @@ list(
   tar_target(trimmedToast_harm_harm, calc_toast("harm", harm_trimmed_mv, trimmed_mdes_harm_harm, "Trimmed Harm", "harm")),
   # notharm level
   tar_target(trimmedToast_harm_notharm, calc_toast("notharm", harm_trimmed_mv, trimmed_mdes_harm_notharm, "Trimmed Not Harm", "harm")),
-
+  
   ## Intent
   # meane level
   tar_target(trimmedToast_intent_meane, calc_toast("meane", intent_trimmed_mv, trimmed_mdes_intent_meane, "Trimmed Intent Mean-Effect", "intent")),
@@ -640,7 +651,7 @@ list(
   tar_target(trimmedToast_in_action_action, calc_toast("action", in_action_trimmed_mv, trimmed_mdes_in_action_action, "Trimmed In-Action Action", "in_action")),
   # inaction level
   tar_target(trimmedToast_in_action_inaction, calc_toast("inaction", in_action_trimmed_mv, trimmed_mdes_in_action_inaction, "Trimmed In-Action Inaction", "in_action")),
-
+  
   ## AI Type A (AI vs. Robot)
   ## AI level
   tar_target(trimmedToast_aiTypeA_ai, calc_toast("AI", aiType_a_trimmed_mv, trimmed_mdes_aiTypeA_ai, "Trimmed AI Type A AI", "aiType_a")),
@@ -654,13 +665,13 @@ list(
   tar_target(trimmedToast_aiTypeB_mechanical, calc_toast("mechanical", aiType_b_trimmed_mv, trimmed_mdes_aiTypeB_mechanical, "Trimmed AI Type B Mechanical Robot", "aiType_b")),
   # Humanoid Robot level
   tar_target(trimmedToast_aiTypeB_humanoid, calc_toast("humanoid", aiType_b_trimmed_mv, trimmed_mdes_aiTypeB_humanoid, "Trimmed AI Type B Humanoid Robot", "aiType_b")),
-
+  
   #  ## Agent Intelligence
   # # Implied level
   tar_target(trimmedToast_agent_intel_implied, calc_toast("implied", agent_intel_trimmed_mv, trimmed_mdes_agent_intel_implied, "Trimmed Agent Intelligence Implied", "agent_intel")),
   # Not Implied level
   tar_target(trimmedToast_agent_intel_notImplied, calc_toast("notImplied", agent_intel_trimmed_mv, trimmed_mdes_agent_intel_notImplied, "Trimmed Agent Intelligence Not Implied", "agent_intel")),
-
+  
   # DV synonym ("acceptable", "appropriate", "good", "justifiable", "moral", "permissible", "right", "unethical",  "wrong")
   tar_target(trimmedToast_dv_synonym_acceptable, calc_toast("acceptable", dv_synonym_trimmed_mv, trimmed_mdes_dv_synonym_acceptable, "Trimmed DV Synonym Acceptable", "dv_synonym")),
   tar_target(trimmedToast_dv_synonym_appropriate, calc_toast("appropriate", dv_synonym_trimmed_mv, trimmed_mdes_dv_synonym_appropriate, "Trimmed DV Synonym Appropriate", "dv_synonym")),
@@ -671,21 +682,21 @@ list(
   tar_target(trimmedToast_dv_synonym_right, calc_toast("right", dv_synonym_trimmed_mv, trimmed_mdes_dv_synonym_right, "Trimmed DV Synonym Right", "dv_synonym")),
   tar_target(trimmedToast_dv_synonym_unethical, calc_toast("unethical", dv_synonym_trimmed_mv, trimmed_mdes_dv_synonym_unethical, "Trimmed DV Synonym Unethical", "dv_synonym")),
   tar_target(trimmedToast_dv_synonym_wrong, calc_toast("wrong", dv_synonym_trimmed_mv, trimmed_mdes_dv_synonym_wrong, "Trimmed DV Synonym Wrong", "dv_synonym")),
-
+  
   ### continuous
-  tar_target(trimmedToast_pma, calc_toast_cont(pma_trimmed_mv, trimmed_mdes_PMA, "Trimmed PMA")),
-  tar_target(trimmedToast_pmc, calc_toast_cont(pmc_trimmed_mv, trimmed_mdes_PMC, "Trimmed PMC")),
-  tar_target(trimmedToast_responsible, calc_toast_cont(responsible_trimmed_mv, trimmed_mdes_responsible, "Trimmed Responsible")),
-  tar_target(trimmedToast_rq, calc_toast_cont(rq_trimmed_mv, trimmed_mdes_RQ, "Trimmed RQ")),
-
+  tar_target(trimmedToast_pma, calc_toast_cont(trimmed_df,"PMA",pma_trimmed_mv, trimmed_mdes_PMA, "Trimmed PMA")),
+  tar_target(trimmedToast_pmc, calc_toast_cont(trimmed_df,"PMC",pmc_trimmed_mv, trimmed_mdes_PMC, "Trimmed PMC")),
+  tar_target(trimmedToast_responsible, calc_toast_cont(trimmed_df,"responsible",responsible_trimmed_mv, trimmed_mdes_responsible, "Trimmed Responsible")),
+  tar_target(trimmedToast_rq, calc_toast_cont(trimmed_df,"RQ",rq_trimmed_mv, trimmed_mdes_RQ, "Trimmed RQ")),
+  
   ### Multiple Regression Models
-  tar_target(trimmedToast_intent_in_action_ise, calc_toast_for_multi_reg("sidee", intent_in_action_trimmed_mv, trimmed_mdes_intent_in_action_ise, "Trimmed MD SE", "intent")),
-  tar_target(trimmedToast_intent_in_action_ime, calc_toast_for_multi_reg("meane", intent_in_action_trimmed_mv, trimmed_mdes_intent_in_action_ise, "Trimmed MD ME", "intent")),
-  tar_target(trimmedToast_intent_in_action_mdi, calc_toast_for_multi_reg("inaction", intent_in_action_trimmed_mv, trimmed_mdes_intent_in_action_mdi, "Trimmed I MDI", "in_action")),
-  tar_target(trimmedToast_intent_in_action_mda, calc_toast_for_multi_reg("action", intent_in_action_trimmed_mv, trimmed_mdes_intent_in_action_mda, "Trimmed I MDA", "in_action")),
+  tar_target(trimmedToast_intent_in_action_ise, calc_toast_for_multi_reg(trimmed_df, "sidee",  trimmed_mdes_intent_in_action_ise, "intent", c("intent","in_action"), c("cat","cat"), "cat")),
+  tar_target(trimmedToast_intent_in_action_ime, calc_toast_for_multi_reg(trimmed_df,"meane",  trimmed_mdes_intent_in_action_ise, "intent", c("intent","in_action"), c("cat","cat"), "cat")),
+  tar_target(trimmedToast_intent_in_action_mdi, calc_toast_for_multi_reg(trimmed_df,"inaction",  trimmed_mdes_intent_in_action_mdi, "in_action", c("intent","in_action"), c("cat","cat"), "cat")),
+  tar_target(trimmedToast_intent_in_action_mda, calc_toast_for_multi_reg(trimmed_df, "action", trimmed_mdes_intent_in_action_mda, "in_action", c("intent","in_action"), c("cat","cat"), "cat")),
   ## Responsible Cat Levels x Responsible
-  tar_target(trimmedToast_responsible_with_catLvls, calc_toast_cont(responsibleCat_responsible_trimmed_mv, trimmed_mdes_responsible_with_catLvls, "Trimmed Responsible with Cat Levels")),
-
+  tar_target(trimmedToast_responsible_with_catLvls, calc_toast_cont(trimmed_df,"responsible",responsibleCat_responsible_trimmed_mv, trimmed_mdes_responsible_with_catLvls, "Trimmed Responsible with Cat Levels")),
+  
   ###########################
   # TABLES
   ###########################
@@ -794,5 +805,9 @@ list(
   tar_target(aiTypeB_orchard_plot_trimmed, create_orchard_plot_for_cat_mods(aiType_b_trimmed_mv, "aiType_b", "aiTypeB_orchard_plot_trimmed")),
   tar_target(agent_intel_orchard_plot_trimmed, create_orchard_plot_for_cat_mods(agent_intel_trimmed_mv, "agent_intel", "agent_intel_orchard_plot_trimmed")),
   tar_target(dv_synonym_orchard_plot_trimmed, create_orchard_plot_for_cat_mods(dv_synonym_trimmed_mv, "dv_synonym", "dv_synonym_orchard_plot_trimmed")),
-  tar_target(responsible_with_cat_orchard_plot_trimmed, create_orchard_plot_for_cat_mods(responsibleCat_responsible_trimmed_mv, "responsibleCat", "responsible_with_cat_orchard_plot_trimmed"))
+  tar_target(responsible_with_cat_orchard_plot_trimmed, create_orchard_plot_for_cat_mods(responsibleCat_responsible_trimmed_mv, "responsibleCat", "responsible_with_cat_orchard_plot_trimmed")),
+  tar_target(total_group_Ns_full, calculate_total_and_group_Ns(data_studies_df, inf_manual_data_df)),
+  tar_target(total_group_Ns_trimmed, calculate_total_and_group_Ns_for_trimmed(data_studies_df, inf_manual_data_df)),
+  tar_target(min_max_Ns_full, calculate_per_study_N_ranges_full(data_studies_df, inf_manual_data_df)),
+  tar_target(min_max_Ns_trimmed, calculate_per_study_N_ranges_trimmed(data_studies_df, inf_manual_data_df))
 )
