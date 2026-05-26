@@ -12,14 +12,12 @@ tar_option_set(
   )
 )
 
-# Run the R scripts in the R/ folder with your custom functions:
+# Tell targets where our scripts are
 tar_source("scripts")
 
 list(
   # read in files that cannot be openly shared
-  tar_target(data_studies_df, readRDS("outputs/data_studies_df.rds")),
-  tar_target(inf_manual_data_df, readRDS("outputs/inf_manual_data_df.rds")),
-  tar_target(full_df, read_clean_data("data_clean/full_data.csv")),
+  tar_target(full_df, read_clean_data("data_clean/full_data.csv")), # final dataset (referred to as full dataset in the manuscript)
   tar_target(
     overall_studies_csv,
     {
@@ -43,7 +41,7 @@ list(
         )
 
       # write the CSV
-      write.csv(overall_studies, "data_clean/overallDF.csv", row.names = FALSE)
+      write.csv(overall_studies, "data_clean/overallDF.csv", row.names = FALSE) # here we're just saving a csv version with only the columns we need
 
       # return the file path for targets tracking
       "data_clean/overallDF.csv"
@@ -51,10 +49,12 @@ list(
     format = "file"
   ),
   tar_target(desc_inf_data_avail_df, read_clean_data("data_clean/desc_inf_data_avail_df.csv")),
-  tar_target(final_data_avail_df, correct_participant_id_in_data_avail_df(full_df, desc_inf_data_avail_df)),
+  tar_target(final_data_avail_df, correct_participant_id_in_data_avail_df(full_df, desc_inf_data_avail_df)), # here we assign a participant sample ID for every unique sample (Ps must not be included in another es row to qualify as a unique PID)
+  # the full function "correct_participant_id_in_data_avail_df" can be viewed in the "01_analysis.r" script 
   ###########################
   # MAIN MODEL W. ALL DATA
   ###########################
+  # see the script "02_analysis_fit_best_model.r" to view the full structure of these models
   tar_target(fourlvl, fit_fourlvl(full_df, "fourlvl")),
   tar_target(fourlvl_article, fit_fourlvl_article(full_df, "fourlvl_article")),
   tar_target(threelvl_pID, fit_threelvl_pID(full_df, "threelvl_pID")),
@@ -71,13 +71,14 @@ list(
     compare_all_models(
       "fourlvl", "fourlvl_article", "threelvl_article_pID", "threelvl_pID", "threelvl_study", "threelvl_article", "threelvl", "twolvl", "twolvl_pID", "twolvl_study", "onelvl"
     )
-  ),
-  tar_target(twolvl_pID_vs_threelvl, compare_model_comparison_winners_anova(twolvl_pID, threelvl)),
+  ), # function for model comparison is in the script "02_analysis_fit_best_model.r"
+  tar_target(twolvl_pID_vs_threelvl, compare_model_comparison_winners_anova(twolvl_pID, threelvl)), 
   tar_target(twolvl_pID_vs_threelvl_article_pID, compare_model_comparison_winners_anova(threelvl_article_pID, twolvl_pID)),
   tar_target(m_multi, fit_selected_model_structure(mod = NULL, full_df)),
+  # see script "03_outlier_analysis.r" for functions below
   tar_target(basic_outlier_trimmed_df, run_basic_outlier_analysis(full_df, m_multi)),
   tar_target(conservative_check_df, run_conservative_outlier_analysis(full_df, m_multi)),
-  tar_target(outliers, create_outlier_df_to_inspect(conservative_check_df)),
+  tar_target(outliers, create_outlier_df_to_inspect(conservative_check_df)), 
   tar_target(influence_stats_df, calculate_influential_stats(conservative_check_df, m_multi)),
   tar_target(
     influence_stats_df_csv,
@@ -93,7 +94,7 @@ list(
     },
     format = "file"
   ),
-  tar_target(influence_outliers_table, create_influence_table(influence_stats_df)),
+  tar_target(influence_outliers_table, create_influence_table(influence_stats_df)), # function in "tables.r" script
   ##### data summary
   tar_target(
     full_registry_file,
@@ -104,7 +105,7 @@ list(
     full_registry,
     read_rds_data(full_registry_file)
   ),
-  tar_target(method_counts, summary_manual_calc_methods(full_registry)),
+  tar_target(method_counts, summary_manual_calc_methods(full_registry)), # see "data_summary.R" script
   tar_target(outlier_class_distrib, plot_outlier_classification_distribution(conservative_check_df, m_multi)),
   tar_target(outlier_class_distrib_plot,
     {
@@ -700,8 +701,8 @@ list(
   ###########################
   # TABLES
   ###########################
-  tar_target(descriptives, construct_desc_tbl(trimmed_df)),
-  tar_target(df_excel, format_col_desc_tbl(descriptives)),
+  tar_target(descriptives, construct_desc_tbl(trimmed_df)), # function in "tables.r" script
+  tar_target(df_excel, format_col_desc_tbl(descriptives)), # function in "tables.r" script
   tar_target(
     desc_excel_csv,
     {
@@ -711,10 +712,8 @@ list(
     },
     format = "file"
   ),
-  tar_target(demo_workbook, create_descriptives_workbook(df_excel)),
-  tar_target(apa_col_influence_table, format_influential_stats_table_apa(influence_stats_df)),
-  tar_target(apa_col_outlier_table, format_full_outlier_stats_table_apa(influence_stats_df)),
-  tar_target(apa_influence_table, create_influential_workbook(apa_col_influence_table)),
+  tar_target(apa_col_influence_table, format_influential_stats_table_apa(influence_stats_df)), # function in "tables.r" script
+  tar_target(apa_col_outlier_table, format_full_outlier_stats_table_apa(influence_stats_df)), # function in "tables.r" script
   tar_target(model_fit_table_full, create_model_fit_table(
     "threelvl_article_pID",
     "threelvl_pID",
@@ -729,8 +728,8 @@ list(
     "twolvl_trimmed_pID",
     "onelvl_trimmed"
   )),
-  tar_target(dv_syn_table, create_k_dv_syn_sum_table(dv_synonym_trimmed_mv)),
-  tar_target(dv_syn_table_full, create_k_dv_syn_sum_table(dv_synonym_mv)),
+  tar_target(dv_syn_table, create_k_dv_syn_sum_table(dv_synonym_trimmed_mv)), # function in "tables.r" script
+  tar_target(dv_syn_table_full, create_k_dv_syn_sum_table(dv_synonym_mv)), # function in "tables.r" script
   tar_target(TOST_dv_syn_table, create_TOST_dv_syn_sum_table(
     trimmedToast_dv_synonym_acceptable,
     trimmedToast_dv_synonym_appropriate,
@@ -741,7 +740,7 @@ list(
     trimmedToast_dv_synonym_right,
     trimmedToast_dv_synonym_unethical,
     trimmedToast_dv_synonym_wrong
-  )),
+  )), # function in "tables.r" script
   tar_target(TOST_dv_syn_table_full, create_TOST_dv_syn_sum_table(
     fullToast_dv_synonym_acceptable,
     fullToast_dv_synonym_appropriate,
@@ -752,12 +751,12 @@ list(
     fullToast_dv_synonym_right,
     fullToast_dv_synonym_unethical,
     fullToast_dv_synonym_wrong
-  )),
+  )), # function in "tables.r" script
   tar_target(rq_df, "docs/RQ_formattedTable.csv", format = "file"),
-  tar_target(rq_table, create_rq_table(rq_df)),
-  tar_target(min_k_cat_level, create_low_cat_lvl_tbl(full_df, trimmed_df)),
-  tar_target(stream_min_k_cat_lvl_tbl, streamline_min_k_cat_level_tbl(min_k_cat_level)),
-  tar_target(mod_table_apa, create_mod_df_table(trimmed_df)),
+  tar_target(rq_table, create_rq_table(rq_df)), # function in "tables.r" script
+  tar_target(min_k_cat_level, create_low_cat_lvl_tbl(full_df, trimmed_df)), # function in "tables.r" script
+  tar_target(stream_min_k_cat_lvl_tbl, streamline_min_k_cat_level_tbl(min_k_cat_level)), # function in "tables.r" script
+  tar_target(mod_table_apa, create_mod_df_table(trimmed_df)), # function in "tables.r" script
   ###########################
   # FIGURES
   ###########################
@@ -806,8 +805,8 @@ list(
   tar_target(agent_intel_orchard_plot_trimmed, create_orchard_plot_for_cat_mods(agent_intel_trimmed_mv, "agent_intel", "agent_intel_orchard_plot_trimmed")),
   tar_target(dv_synonym_orchard_plot_trimmed, create_orchard_plot_for_cat_mods(dv_synonym_trimmed_mv, "dv_synonym", "dv_synonym_orchard_plot_trimmed")),
   tar_target(responsible_with_cat_orchard_plot_trimmed, create_orchard_plot_for_cat_mods(responsibleCat_responsible_trimmed_mv, "responsibleCat", "responsible_with_cat_orchard_plot_trimmed")),
-  tar_target(total_group_Ns_full, calculate_total_and_group_Ns(data_studies_df, inf_manual_data_df)),
-  tar_target(total_group_Ns_trimmed, calculate_total_and_group_Ns_for_trimmed(data_studies_df, inf_manual_data_df)),
-  tar_target(min_max_Ns_full, calculate_per_study_N_ranges_full(data_studies_df, inf_manual_data_df)),
-  tar_target(min_max_Ns_trimmed, calculate_per_study_N_ranges_trimmed(data_studies_df, inf_manual_data_df))
+  tar_target(total_group_Ns_full, readRDS("outputs/total_group_Ns_full.rds")), # see the full function in the "data_summary.R" script (calculate_total_and_group_Ns_for_full) - functions are not used here as required dfs cannot be shared due to data privacy constraints
+  tar_target(total_group_Ns_trimmed, readRDS("outputs/total_group_Ns_trimmed.rds")), # see the full function in the "data_summary.R" script (calculate_total_and_group_Ns_for_trimmed) - functions are not used here as required dfs cannot be shared due to data privacy constraints
+  tar_target(min_max_Ns_full, readRDS("outputs/total_group_Ns_full.rds")), # see the full function in the "data_summary.R" script (calculate_per_study_N_ranges_full) - functions are not used here as required dfs cannot be shared due to data privacy constraints
+  tar_target(min_max_Ns_trimmed, readRDS("outputs/total_group_Ns_trimmed.rds")) # see the full function in the "data_summary.R" script (calculate_per_study_N_ranges_trimmed) - functions are not used here as required dfs cannot be shared due to data privacy constraints
 )

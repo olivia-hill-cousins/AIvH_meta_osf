@@ -1,4 +1,5 @@
 ####### calculate effect sizes for studies where data is available
+# function used here is not displayed in the linked _targets.R, as the final target cannot be shared for data privacy reasons
 calc_es_data_avail <- function(master_df) {
   ## calculate es for data studies
   safe_escalc <- function(row) {
@@ -54,6 +55,7 @@ calc_es_data_avail <- function(master_df) {
 ################################################################################
 # MANUAL STUDIES EFFECT SIZES
 ################################################################################
+# function used here is not displayed in the linked _targets.R, as the final target cannot be shared for data privacy reasons
 calc_es_manual <- function(manual_data_df, full_data_avail_df) {
   manual_desc <- tibble() # initialize empty
 
@@ -283,13 +285,13 @@ calc_es_manual <- function(manual_data_df, full_data_avail_df) {
 
   # meder 2019
   # was coded 0 = AV, 1 = Human driver (& one aspect - staying more pronounced for AV than human) ∴ positive effect size here is correct.
-  # 1. Keep original IDs for the auto studies
+  # Keep original IDs for the auto studies
   full_data_avail_df$og_participant_id <- full_data_avail_df$participant_id
 
-  # 2. Define refs that should share a participant_id
+  # Define refs that should share a participant_id
   shared_refs <- c("wilson2022_s1", "zhang2023_s1", "zhang2023_s2", "zhang2023_s3")
 
-  # 3. Assign unique IDs to all manual rows first
+  # Assign unique IDs to all manual rows first
   max_auto_id <- max(full_data_avail_df$participant_id, na.rm = TRUE)
 
   manual_data_df <- manual_data_df %>%
@@ -298,7 +300,7 @@ calc_es_manual <- function(manual_data_df, full_data_avail_df) {
       participant_id = max_auto_id + row_number() # unique per row
     )
 
-  # 4. Collapse IDs for shared refs: one ID per ref
+  # Collapse IDs for shared refs: one ID per ref
   manual_data_df <- manual_data_df %>%
     group_by(ref) %>%
     mutate(
@@ -316,6 +318,7 @@ calc_es_manual <- function(manual_data_df, full_data_avail_df) {
 ################################################################################
 # COMBINE DATA AVAIL DF AND MANUAL DF
 ################################################################################
+# function used here is not displayed in the linked _targets.R, as the final target cannot be shared for data privacy reasons
 combine_manual_and_data_avail_df <- function(full_data_avail_df, full_manual_df) {
   full_data_avail_df$escalc_result <- NULL
   full_data_avail_df$pct_female <- as.numeric(full_data_avail_df$pct_female)
@@ -337,13 +340,13 @@ combine_manual_and_data_avail_df <- function(full_data_avail_df, full_manual_df)
 
   full_manual_df$PMC <- as.numeric(full_manual_df$PMC)
   full_data_avail_df$PMC <- as.numeric(full_data_avail_df$PMC)
-  # 5. Combine
+  # Combine
   overall_df <- bind_rows(full_data_avail_df, full_manual_df)
 
-  # 6. Order by ref
+  # Order by ref
   overall_df <- overall_df[order(overall_df$ref), ]
 
-  # 7. Compress participant IDs to 1..N
+  # Compress participant IDs to 1..N
   overall_df$participant_id <- match(overall_df$participant_id, unique(overall_df$participant_id))
 
   overall_df$og_participant_id <- overall_df$participant_id

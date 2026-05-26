@@ -6,18 +6,6 @@ summary_manual_calc_methods <- function(full_registry) {
     dplyr::select(-manual_stats) %>%
     unnest_wider(moderator_extractors)
 
-  # Unnest all manual_stats to see what fields exist
-  # manual_fields <- study_reg.df %>%
-  # filter(!map_lgl(manual_stats, is.null)) %>%
-  # pull(manual_stats) %>%
-  # map(~ names(.x)) %>%
-  # unlist() %>%
-  # unique() %>%
-  # sort()
-
-  ## print("All manual_stats fields found:")
-  ## print(manual_fields)
-
   # Count studies by each method/field
   method_counts <- study_reg.df %>%
     filter(!map_lgl(manual_stats, is.null)) %>%
@@ -143,6 +131,12 @@ calculate_total_and_group_Ns <- function(data_studies_df, inf_manual_data_df) {
       ai_total = extracted_ai + manual_ai
     )
   )
+  label <- "total_group_Ns_full"
+  # build the filename using the input
+  file_name <- paste0("outputs/", label, ".rds")
+  
+  # save the object
+  saveRDS(out, file_name)
   out
 }
 
@@ -244,6 +238,12 @@ calculate_total_and_group_Ns_for_trimmed <-  function(data_studies_df, inf_manua
         ai_total = extracted_ai + manual_ai
       )
     )
+    label <- "total_group_Ns_trimmed"
+    # build the filename using the input
+    file_name <- paste0("outputs/", label, ".rds")
+    
+    # save the object
+    saveRDS(out, file_name)
     out
 }
 
@@ -389,7 +389,7 @@ calculate_per_study_N_ranges_trimmed <- function(data_studies_df, inf_manual_dat
   # -----------------------------
   # 8. Return everything cleanly
   # -----------------------------
-  list(
+  out <- list(
     extracted_per_study = extracted_per_study,
     manual_per_study    = manual_per_study,
     combined_per_study  = combined_per_study,
@@ -398,6 +398,14 @@ calculate_per_study_N_ranges_trimmed <- function(data_studies_df, inf_manual_dat
     manual_ranges    = manual_ranges,
     combined_ranges  = combined_ranges
   )
+  
+  label <- "min_max_Ns_trimmed"
+  # build the filename using the input
+  file_name <- paste0("outputs/", label, ".rds")
+  
+  # save the object
+  saveRDS(out, file_name)
+  out
 }
 
 
@@ -545,7 +553,7 @@ calculate_per_study_N_ranges_full <- function(data_studies_df, inf_manual_data_d
   # -----------------------------
   # 8. Return everything cleanly
   # -----------------------------
-  list(
+  out <- list(
     extracted_per_study = extracted_per_study,
     manual_per_study    = manual_per_study,
     combined_per_study  = combined_per_study,
@@ -554,4 +562,13 @@ calculate_per_study_N_ranges_full <- function(data_studies_df, inf_manual_data_d
     manual_ranges    = manual_ranges,
     combined_ranges  = combined_ranges
   )
+  
+  label <- "min_max_Ns_full"
+  # build the filename using the input
+  file_name <- paste0("outputs/", label, ".rds")
+  
+  # save the object
+  saveRDS(out, file_name)
+  out
+  
 }
