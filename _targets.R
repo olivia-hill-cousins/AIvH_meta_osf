@@ -208,7 +208,8 @@ list(
   ## Agent Intelligence
   tar_target(agent_intel_mv, run_meta_analysis(full_df, "agent_intel", "cat")),
   ## AI Type A (AI vs Robot)
-  tar_target(aiType_a_mv, run_meta_analysis(full_df, "aiType_a", "cat")),
+  tar_target(aiType_a_df_cleaned, fully_clean_aiType_a(full_df)), ## one remaining "NULL" value created a "NULL" factor level for this analysis originally. As all other NULL, NAs etc. were dealt with in the og run_meta_analysis, I just created an exception for this singular model to prevent re-running all other analyses.
+  tar_target(aiType_a_mv, run_meta_analysis(aiType_a_df_cleaned, "aiType_a", "cat")),
   ## AI Type B (AI vs. Mechanical Robot vs. Humanoid Robot)
   tar_target(aiType_b_mv, run_meta_analysis(full_df, "aiType_b", "cat")),
   ## DV Synonym

@@ -144,7 +144,13 @@ run_meta_analysis <- function(df, mod_col, data_type) {
     )
   )
 }
-
+## for one analysis in supp mat:
+fully_clean_aiType_a <- function(df) 
+{
+  aiType_a_clean <- df |>
+    mutate(aiType_a = ifelse(aiType_a == "NULL", NA, aiType_a)) |>
+    filter(!is.na(aiType_a))
+}
 ###############################################
 # Z-SCORING RQ
 ###############################################
