@@ -1,3 +1,6 @@
+################################################################################
+# INFLUENTIAL STATS TABLE
+################################################################################
 create_influence_table <- function(influence_stats_df) {
   influence_stats_df <- influence_stats_df %>%
     dplyr::mutate(
@@ -18,17 +21,172 @@ create_influence_table <- function(influence_stats_df) {
   message("Influential outliers *N*:", nrow(count.influentialOutliers))
   influ.Out <- table(count.influentialOutliers$authors, count.influentialOutliers$study, count.influentialOutliers$hat_flag)
   influ.Out <- as.data.frame(influ.Out)
-
+  
   influ.Out <- influ.Out %>%
     filter(Freq != 0) %>%
     arrange(Var1, Var2)
   write.csv(count.influentialOutliers, "tables/influence_outliers_table.csv")
   kable(influ.Out[, c("Var1", "Var2", "Freq")],
-    col.names = c("First Author", "Study", "*n*"),
-    caption = NULL, digits = 1
+        col.names = c("First Author", "Study", "*n*"),
+        caption = NULL, digits = 1
   )
 }
-
+## table of influential outliers only (included in main manuscript)
+format_influential_stats_table_apa <- function(influence_stats_df) {
+  # influence df w. only outliers
+  count.outliers <- influence_stats_df %>%
+    dplyr::filter(outlier == TRUE)
+  # filter w. only influential outliers
+  count.influentialOutliers <- count.outliers %>%
+    dplyr::filter(hat_flag == TRUE)
+  count.influentialOutliers <- count.influentialOutliers %>%
+    dplyr::mutate(
+      apa_ref = paste0(
+        str_to_title(str_extract(ref, "^[a-z]+")),
+        " et al., (",
+        str_extract(ref, "\\d{4}[a-z]?"), # FIXED: Capture year + optional letter
+        ")"
+      ),
+      Study = paste0(
+        "Study ",
+        str_extract(ref, "(?<=_s)\\d+(?:\\.\\d+)?")
+      ),
+      participant_id = participant_id
+    ) %>%
+    dplyr::select(apa_ref, Study, participant_id, effect_size, cooks, cooks_flag, intrcpt, intrcpt.1, hatvalues, hat_flag)
+  
+  count.influentialOutliers$Study <- gsub("\\b[Ss]tudy\\b\\s*", "", count.influentialOutliers$Study)
+  count.influentialOutliers$Study[count.influentialOutliers$Study == ""] <- NA
+  
+  count.influentialOutliers
+  
+  count.influentialOutliers <- count.influentialOutliers %>%
+    mutate(
+      effect_size = round(effect_size, 2),
+      cooks = round(cooks, 2),
+      intrcpt = round(intrcpt, 2),
+      hatvalues = round(hatvalues, 2),
+      blank_one = NA_real_,
+      blank_two = NA_real_
+    ) %>%
+    # Reorder EXPLICITLY - no column name conflicts
+    dplyr::select(
+      Article = apa_ref,
+      Study = Study,
+      "Ps ID" = participant_id,
+      g = effect_size,
+      "Cooks Value" = cooks, # Spaced names
+      "Cooks Flag" = cooks_flag,
+      blank_one,
+      "DFBETAS Value" = intrcpt,
+      "DFBETAS Flag" = intrcpt.1,
+      blank_two,
+      "Hat Values" = hatvalues,
+      "Hat Flag" = hat_flag
+    )
+  count.influentialOutliers
+}
+## table of all outliers (included in the supplementary materials)
+format_full_outlier_stats_table_apa <- function(count.influentialOutliers) {
+  # influence df w. only outliers
+  count.influentialOutliers <- count.influentialOutliers %>%
+    dplyr::mutate(
+      apa_ref = paste0(
+        str_to_title(str_extract(ref, "^[a-z]+")),
+        " et al., (",
+        str_extract(ref, "\\d{4}[a-z]?"), # FIXED: Capture year + optional letter
+        ")"
+      ),
+      Study = paste0(
+        "Study ",
+        str_extract(ref, "(?<=_s)\\d+(?:\\.\\d+)?")
+      ),
+      participant_id = participant_id
+    ) %>%
+    dplyr::select(apa_ref, Study, participant_id, effect_size, cooks, cooks_flag, intrcpt, intrcpt.1, hatvalues, hat_flag)
+  
+  count.influentialOutliers$Study <- gsub("\\b[Ss]tudy\\b\\s*", "", count.influentialOutliers$Study)
+  count.influentialOutliers$Study[count.influentialOutliers$Study == ""] <- NA
+  
+  count.influentialOutliers
+  
+  count.influentialOutliers <- count.influentialOutliers %>%
+    mutate(
+      effect_size = round(effect_size, 2),
+      cooks = round(cooks, 2),
+      intrcpt = round(intrcpt, 2),
+      hatvalues = round(hatvalues, 2),
+      blank_one = NA_real_,
+      blank_two = NA_real_
+    ) %>%
+    # Reorder EXPLICITLY - no column name conflicts
+    dplyr::select(
+      Article = apa_ref,
+      Study = Study,
+      PsID = participant_id,
+      g = effect_size,
+      "Cooks Value" = cooks, # Spaced names
+      "Cooks Flag" = cooks_flag,
+      blank_one,
+      "DFBETAS Value" = intrcpt,
+      "DFBETAS Flag" = intrcpt.1,
+      blank_two,
+      "Hat Values" = hatvalues,
+      "Hat Flag" = hat_flag
+    )
+  
+  df2 <- count.influentialOutliers |>
+    mutate(
+      Article = trimws(Article),
+      PsID = trimws(PsID),
+      Study = as.integer(trimws(Study))
+    ) |>
+    arrange(Article) |>
+    # First row within each Article
+    group_by(Article) |>
+    mutate(
+      is_first_row_for_article = row_number() == 1
+    ) |>
+    ungroup() |>
+    # First row within each Article × Study
+    group_by(Article, Study) |>
+    mutate(
+      study_n = n(),
+      is_first_row_st = row_number() == 1
+    ) |>
+    ungroup() |>
+    # Apply deleteData() logic
+    mutate(
+      Study_display = if_else(
+        !is_first_row_for_article &
+          !is.na(Study) &
+          study_n > 1 &
+          !is_first_row_st,
+        "",
+        as.character(Study)
+      ),
+      
+      # Apply Article deleteData() logic
+      Article_display = if_else(
+        is_first_row_for_article,
+        Article,
+        ""
+      )
+    )
+  
+  
+  #  2. Drop the original Study column and rename Study_display
+  
+  df2 <- df2 |>
+    select(-Study, -Article) |>
+    rename(
+      Study   = Study_display,
+      Article = Article_display,
+      "Ps ID" = PsID
+    ) %>%
+    select(Article, Study, "Ps ID", g, "Cooks Value", "Cooks Flag", "blank_one", "DFBETAS Value", "DFBETAS Flag", "blank_two", "Hat Values", "Hat Flag")
+  df2
+}
 
 ###############################################################################
 # DESCRIPTIVES TABLE (TRIMMED)
@@ -230,164 +388,7 @@ format_col_desc_tbl <- function(descriptives) {
 
   df_excel
 }
-################################################################################
-# INFLUENTIAL STATS TABLE
-################################################################################
-format_influential_stats_table_apa <- function(influence_stats_df) {
-  # influence df w. only outliers
-  count.outliers <- influence_stats_df %>%
-    dplyr::filter(outlier == TRUE)
-  # filter w. only influential outliers
-  count.influentialOutliers <- count.outliers %>%
-    dplyr::filter(hat_flag == TRUE)
-  count.influentialOutliers <- count.influentialOutliers %>%
-    dplyr::mutate(
-      apa_ref = paste0(
-        str_to_title(str_extract(ref, "^[a-z]+")),
-        " et al., (",
-        str_extract(ref, "\\d{4}[a-z]?"), # FIXED: Capture year + optional letter
-        ")"
-      ),
-      Study = paste0(
-        "Study ",
-        str_extract(ref, "(?<=_s)\\d+(?:\\.\\d+)?")
-      ),
-      participant_id = participant_id
-    ) %>%
-    dplyr::select(apa_ref, Study, participant_id, effect_size, cooks, cooks_flag, intrcpt, intrcpt.1, hatvalues, hat_flag)
 
-  count.influentialOutliers$Study <- gsub("\\b[Ss]tudy\\b\\s*", "", count.influentialOutliers$Study)
-  count.influentialOutliers$Study[count.influentialOutliers$Study == ""] <- NA
-
-  count.influentialOutliers
-
-  count.influentialOutliers <- count.influentialOutliers %>%
-    mutate(
-      effect_size = round(effect_size, 2),
-      cooks = round(cooks, 2),
-      intrcpt = round(intrcpt, 2),
-      hatvalues = round(hatvalues, 2),
-      blank_one = NA_real_,
-      blank_two = NA_real_
-    ) %>%
-    # Reorder EXPLICITLY - no column name conflicts
-    dplyr::select(
-      Article = apa_ref,
-      Study = Study,
-      "Ps ID" = participant_id,
-      g = effect_size,
-      "Cooks Value" = cooks, # Spaced names
-      "Cooks Flag" = cooks_flag,
-      blank_one,
-      "DFBETAS Value" = intrcpt,
-      "DFBETAS Flag" = intrcpt.1,
-      blank_two,
-      "Hat Values" = hatvalues,
-      "Hat Flag" = hat_flag
-    )
-  count.influentialOutliers
-}
-
-format_full_outlier_stats_table_apa <- function(count.influentialOutliers) {
-  # influence df w. only outliers
-  count.influentialOutliers <- count.influentialOutliers %>%
-    dplyr::mutate(
-      apa_ref = paste0(
-        str_to_title(str_extract(ref, "^[a-z]+")),
-        " et al., (",
-        str_extract(ref, "\\d{4}[a-z]?"), # FIXED: Capture year + optional letter
-        ")"
-      ),
-      Study = paste0(
-        "Study ",
-        str_extract(ref, "(?<=_s)\\d+(?:\\.\\d+)?")
-      ),
-      participant_id = participant_id
-    ) %>%
-    dplyr::select(apa_ref, Study, participant_id, effect_size, cooks, cooks_flag, intrcpt, intrcpt.1, hatvalues, hat_flag)
-
-  count.influentialOutliers$Study <- gsub("\\b[Ss]tudy\\b\\s*", "", count.influentialOutliers$Study)
-  count.influentialOutliers$Study[count.influentialOutliers$Study == ""] <- NA
-
-  count.influentialOutliers
-
-  count.influentialOutliers <- count.influentialOutliers %>%
-    mutate(
-      effect_size = round(effect_size, 2),
-      cooks = round(cooks, 2),
-      intrcpt = round(intrcpt, 2),
-      hatvalues = round(hatvalues, 2),
-      blank_one = NA_real_,
-      blank_two = NA_real_
-    ) %>%
-    # Reorder EXPLICITLY - no column name conflicts
-    dplyr::select(
-      Article = apa_ref,
-      Study = Study,
-      PsID = participant_id,
-      g = effect_size,
-      "Cooks Value" = cooks, # Spaced names
-      "Cooks Flag" = cooks_flag,
-      blank_one,
-      "DFBETAS Value" = intrcpt,
-      "DFBETAS Flag" = intrcpt.1,
-      blank_two,
-      "Hat Values" = hatvalues,
-      "Hat Flag" = hat_flag
-    )
-
-  df2 <- count.influentialOutliers |>
-    mutate(
-      Article = trimws(Article),
-      PsID = trimws(PsID),
-      Study = as.integer(trimws(Study))
-    ) |>
-    arrange(Article) |>
-    # First row within each Article
-    group_by(Article) |>
-    mutate(
-      is_first_row_for_article = row_number() == 1
-    ) |>
-    ungroup() |>
-    # First row within each Article × Study
-    group_by(Article, Study) |>
-    mutate(
-      study_n = n(),
-      is_first_row_st = row_number() == 1
-    ) |>
-    ungroup() |>
-    # Apply deleteData() logic
-    mutate(
-      Study_display = if_else(
-        !is_first_row_for_article &
-          !is.na(Study) &
-          study_n > 1 &
-          !is_first_row_st,
-        "",
-        as.character(Study)
-      ),
-
-      # Apply Article deleteData() logic
-      Article_display = if_else(
-        is_first_row_for_article,
-        Article,
-        ""
-      )
-    )
-
-
-  #  2. Drop the original Study column and rename Study_display
-
-  df2 <- df2 |>
-    select(-Study, -Article) |>
-    rename(
-      Study   = Study_display,
-      Article = Article_display,
-      "Ps ID" = PsID
-    ) %>%
-    select(Article, Study, "Ps ID", g, "Cooks Value", "Cooks Flag", "blank_one", "DFBETAS Value", "DFBETAS Flag", "blank_two", "Hat Values", "Hat Flag")
-  df2
-}
 ###########################
 # DV SYNONYM MOD TABLES
 ###########################
@@ -530,7 +531,7 @@ create_low_cat_lvl_tbl <- function(combined_df, trimmed_df) {
 
   df
 }
-
+# function below just *visually* simplifies the table above
 streamline_min_k_cat_level_tbl <- function(min_k_cat_level) {
   # Pivot combined/trimmed into wide format
   wide <- min_k_cat_level %>%
@@ -591,7 +592,9 @@ streamline_min_k_cat_level_tbl <- function(min_k_cat_level) {
   final_table
 }
 
-
+################################################
+# TABLE OF ALL MODS EACH SAMPLE CONTRIBUTES TO
+################################################
 create_mod_df_table <- function(mod.df) {
   # Ensure numeric sorting if possible
   mod.df <- mod.df[order(as.numeric(as.character(mod.df$article_id))), ]

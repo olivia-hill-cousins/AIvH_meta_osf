@@ -5,81 +5,9 @@ get_effect_sign <- function(model, coef_name = NULL) {
     return(sign(model$beta[[coef_name]])) # moderator slope
   }
 }
-
-# -------------------------
-# CATEGORICAL: per level
-# -------------------------
-# sim_power_cat_level <- function(df,
-#                                 mod,
-#                                 lvl,
-#                                 b1,
-#                                 b0 = 0,
-#                                 nsim = 500,
-#                                 alpha = 0.05,
-#                                 seed = 123,
-#                                 verbose = TRUE) {
-#   if (!is.null(seed)) set.seed(seed)
-#
-#   sim_df <- df %>%
-#     filter(!is.na(.data[[mod]]), .data[[mod]] == lvl)
-#
-#   if (nrow(sim_df) == 0) {
-#     if (verbose) message("No rows for level '", lvl, "'. Returning NA.")
-#     return(list(power = NA_real_, ci = c(NA_real_, NA_real_)))
-#   }
-#
-#   sim_df$true_es <- b0 + b1
-#
-#   plan(multisession, workers = max(1, parallel::detectCores() - 1))
-#
-#   rej <- future_map_lgl(
-#     seq_len(nsim),
-#     ~ {
-#       sim_df$yi <- rnorm(
-#         nrow(sim_df),
-#         mean = sim_df$true_es,
-#         sd   = sqrt(sim_df$vi)
-#       )
-#
-#       res <- tryCatch(
-#         metafor::rma.mv(
-#           yi, vi,
-#           random = ~ 1 | participant_id/efN_id,
-#           data   = sim_df,
-#           method = "REML"
-#         ),
-#         error = function(e) NULL
-#       )
-#
-#       if (is.null(res)) return(NA)
-#
-#       pval <- coef(summary(res))[1, "pval"]
-#       !is.na(pval) && pval < alpha
-#     },
-#     .options = furrr_options(seed = seed)
-#   )
-#
-#   plan(sequential)
-#
-#   n_good <- sum(!is.na(rej))
-#   if (n_good == 0) return(list(power = NA_real_, ci = c(NA_real_, NA_real_)))
-#
-#   power_hat <- mean(rej, na.rm = TRUE)
-#
-#   x <- sum(rej, na.rm = TRUE)
-#   n <- n_good
-#   z <- qnorm(0.975)
-#   phat <- x / n
-#   denom <- 1 + z^2 / n
-#   center <- (phat + z^2 / (2 * n)) / denom
-#   half <- z * sqrt((phat * (1 - phat) / n + z^2 / (4 * n^2))) / denom
-#
-#   list(
-#     power = power_hat,
-#     ci = c(max(0, center - half), min(1, center + half))
-#   )
-# }
-
+###############################################
+# Pwr sensitivity analysis for Categorical Mods
+###############################################
 sim_power_cat_level <- function(df,
                                 model,
                                 mod,
@@ -171,7 +99,7 @@ find_mdes_level <- function(df,
                             mdes_min = NULL,
                             mdes_max = NULL,
                             tol = 0.01,
-                            power_tol = 0.02, # NEW
+                            power_tol = 0.02, 
                             nsim = 200,
                             seed = 123,
                             verbose = TRUE,
@@ -280,126 +208,9 @@ find_mdes_level <- function(df,
 }
 
 
-# find_mdes_cat_mod <- function(df,
-#                               mod,
-#                               cat_levels,
-#                               target_power = 0.8,
-#                               b0 = 0,
-#                               b1_min = 0,
-#                               b1_max = 1,
-#                               tol = 0.01,
-#                               nsim = 200,
-#                               seed = 123,
-#                               verbose = TRUE,
-#                               save_prefix = NULL) {
-#
-#   res_list <- map(cat_levels, ~ find_mdes_level(
-#     df           = df,
-#     mod          = mod,
-#     lvl          = .x,
-#     target_power = target_power,
-#     b0           = b0,
-#     b1_min       = b1_min,
-#     b1_max       = b1_max,
-#     tol          = tol,
-#     nsim         = nsim,
-#     seed         = seed,
-#     verbose      = verbose,
-#     save_prefix  = save_prefix
-#   ))
-#
-#   finals <- map_dfr(res_list, "final")
-#   paths  <- map_dfr(res_list, "path")
-#
-#   list(final = finals, path = paths)
-# }
-
-# -------------------------
-# CONTINUOUS MODERATOR
-# -------------------------
-# sim_power_cont <- function(df,
-#                            mod,
-#                            b1,
-#                            b0 = 0,
-#                            nsim = 200,
-#                            alpha = 0.05,
-#                            seed = 123,
-#                            verbose = TRUE) {
-#
-#   if (!is.null(seed)) set.seed(seed)
-#
-#   if (!is.numeric(df[[mod]])) {
-#     converted <- suppressWarnings(as.numeric(df[[mod]]))
-#     bad_idx <- which(is.na(converted) & !is.na(df[[mod]]))
-#     if (length(bad_idx) > 0) {
-#       bad_vals <- unique(df[[mod]][bad_idx])
-#       stop(
-#         "Non-numeric values in moderator '", mod, "': ",
-#         paste(bad_vals, collapse = ", ")
-#       )
-#     }
-#     df[[mod]] <- converted
-#   }
-#
-#   sim_df <- df %>% filter(!is.na(.data[[mod]]))
-#
-#   if (nrow(sim_df) == 0) {
-#     return(list(power = NA_real_, ci = c(NA_real_, NA_real_)))
-#   }
-#
-#   sim_df$true_es <- b0 + b1 * sim_df[[mod]]
-#
-#   plan(multisession, workers = max(1, parallel::detectCores() - 1))
-#
-#   rej <- future_map_lgl(
-#     seq_len(nsim),
-#     ~ {
-#       sim_df$yi <- rnorm(
-#         nrow(sim_df),
-#         mean = sim_df$true_es,
-#         sd   = sqrt(sim_df$vi)
-#       )
-#
-#       res <- tryCatch(
-#         metafor::rma.mv(
-#           yi, vi,
-#           mods   = as.formula(paste0("~ ", mod)),
-#           random = ~ 1 | participant_id/efN_id,
-#           data   = sim_df,
-#           method = "REML"
-#         ),
-#         error = function(e) NULL
-#       )
-#
-#       if (is.null(res)) return(NA)
-#
-#       pval <- coef(summary(res))[2, "pval"]
-#       if (is.na(pval)) return(NA)
-#       pval < alpha
-#     },
-#     .options = furrr_options(seed = seed)
-#   )
-#
-#   plan(sequential)
-#
-#   n_good <- sum(!is.na(rej))
-#   if (n_good == 0) return(list(power = NA_real_, ci = c(NA_real_, NA_real_)))
-#
-#   power_hat <- mean(rej, na.rm = TRUE)
-#
-#   x <- sum(rej, na.rm = TRUE)
-#   n <- n_good
-#   z <- qnorm(0.975)
-#   phat <- x / n
-#   denom <- 1 + z^2 / n
-#   center <- (phat + z^2 / (2 * n)) / denom
-#   half <- z * sqrt((phat * (1 - phat) / n + z^2 / (4 * n^2))) / denom
-#
-#   list(
-#     power = power_hat,
-#     ci = c(max(0, center - half), min(1, center + half))
-#   )
-# }
+###############################################
+# Pwr sensitivity analysis for Continuous Mods
+###############################################
 
 sim_power_cont <- function(df,
                            model,
@@ -566,73 +377,9 @@ find_mdes_cont <- function(df,
   return(list(final = final, path = bind_rows(results_iter)))
 }
 
-# -------------------------
-# MAIN MODEL
-# -------------------------
-# sim_power_main <- function(df,
-#                            model,
-#                            b1,
-#                            b0 = 0,
-#                            nsim = 500,
-#                            alpha = 0.05,
-#                            seed = 123,
-#                            verbose = TRUE) {
-#
-#   if (!is.null(seed)) set.seed(seed)
-#
-#
-#   df$true_es <- b0 + b1
-#
-#   plan(multisession, workers = max(1, parallel::detectCores() - 1))
-#
-#   rej <- future_map_lgl(
-#     seq_len(nsim),
-#     ~ {
-#       df$yi <- rnorm(
-#         nrow(df),
-#         mean = df$true_es,
-#         sd   = sqrt(df$vi)
-#       )
-#
-#       res <- tryCatch(
-#         metafor::rma.mv(
-#           yi, vi,
-#           random = ~ 1 | participant_id/efN_id,
-#           data   = df,
-#           method = "REML"
-#         ),
-#         error = function(e) NULL
-#       )
-#
-#       if (is.null(res)) return(NA)
-#
-#       pval <- coef(summary(res))[1, "pval"]
-#       !is.na(pval) && pval < alpha
-#     },
-#     .options = furrr_options(seed = seed)
-#   )
-#
-#   plan(sequential)
-#
-#   n_good <- sum(!is.na(rej))
-#   if (n_good == 0) return(list(power = NA_real_, ci = c(NA_real_, NA_real_)))
-#
-#   power_hat <- mean(rej, na.rm = TRUE)
-#
-#   x <- sum(rej, na.rm = TRUE)
-#   n <- n_good
-#   z <- qnorm(0.975)
-#   phat <- x / n
-#   denom <- 1 + z^2 / n
-#   center <- (phat + z^2 / (2 * n)) / denom
-#   half <- z * sqrt((phat * (1 - phat) / n + z^2 / (4 * n^2))) / denom
-#
-#   list(
-#     power = power_hat,
-#     ci = c(max(0, center - half), min(1, center + half))
-#   )
-# }
-
+###############################################
+# Pwr sensitivity analysis for Main Models
+###############################################
 sim_power_main <- function(df,
                            model,
                            b1,
@@ -762,26 +509,6 @@ find_mdes_main <- function(df,
 
     if (pow_mid >= target_power) hi <- mid else lo <- mid
   }
-
-  # # final evaluation
-  # final_b1 <- sign_hat * hi
-  # final_res <- sim_power_main(
-  #   df    = df,
-  #   model = model,
-  #   b1    = final_b1,
-  #   b0    = b0,
-  #   nsim  = nsim * 2,
-  #   seed  = seed,
-  #   verbose = verbose
-  # )
-  #
-  # final <- tibble(
-  #   mod   = "main",
-  #   mdes  = hi,
-  #   power = final_res$power
-  # )
-  #
-  # list(final = final, path = bind_rows(results_iter))
   final <- tibble(
     mod   = "main",
     mdes  = hi,
@@ -791,9 +518,12 @@ find_mdes_main <- function(df,
 }
 
 
-#### combining mdes results
+###############################################
+# Combining MDES results
+###############################################
 # combining main ones
-combine_main_mdes_results <- function(full, trimmed) {
+combine_main_mdes_results <- function(full, trimmed) 
+  {
   full_path <- full$path
   trimmed_path <- trimmed$path
   ## change value of mod col in _path dfs to full vs trimmed (respectively)
@@ -825,7 +555,8 @@ combine_main_mdes_results <- function(full, trimmed) {
   res
 }
 
-combine_mdes_results <- function(...) {
+combine_mdes_results <- function(...) 
+  {
   dots <- list(...)
 
   # Extract all path data frames
@@ -858,7 +589,8 @@ combine_mdes_results <- function(...) {
 plot_main_mdes_results <- function(meta,
                                    title = "",
                                    x_label = expression("Effect Size (Hedge's " * italic("g") * ")"),
-                                   y_label = "Power") {
+                                   y_label = "Power") 
+  {
   # ---- DEFINE COLOURS FOR BOTH MODELS ----
   model_cols <- c(
     "Full"    = "#A6CEE3",
@@ -1013,7 +745,8 @@ plot_mdes_results <- function(meta,
     )
 }
 
-create_pwr_curve_for_all_mods <- function(meta) {
+create_pwr_curve_for_all_mods <- function(meta) 
+  {
   mycolours <- RColorBrewer::brewer.pal(12, "Paired")
   maincolours <- RColorBrewer::brewer.pal(4, "Set2")
   meta <- meta %>%
@@ -1059,7 +792,6 @@ create_pwr_curve_for_all_mods <- function(meta) {
         TRUE ~ "#000000"
       ),
 
-      # ---- LINETYPES (customise as needed) ----
       linetype = case_when(
         TRUE ~ "dashed"
       )
@@ -1181,7 +913,9 @@ create_pwr_curve_for_all_mods <- function(meta) {
   dev.off()
 }
 
-######### for multi regs
+###############################################
+# Pwr sensitivity analysis for Multi Mods
+###############################################
 find_mdes_level_for_multi_reg <- function(df,
                                           model,
                                           mod,
@@ -1266,6 +1000,8 @@ find_mdes_level_for_multi_reg <- function(df,
     iters  = dplyr::bind_rows(results_iter)
   )
 }
+###############################################
+# Pwr sensitivity analysis for Multi Mods (with at least one continuous)
 
 find_mdes_cont_multi_mods <- function(df,
                                       model,

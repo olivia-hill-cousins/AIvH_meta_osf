@@ -28,7 +28,8 @@ summary_manual_calc_methods <- function(full_registry) {
     arrange(desc(n_studies))
 }
 
-
+#### functions below are used to calculate total & group Ns, as well as N ranges, used in the manuscript
+# full
 calculate_total_and_group_Ns <- function(data_studies_df, inf_manual_data_df) {
   
   data_available_df <- data_studies_df
@@ -139,7 +140,7 @@ calculate_total_and_group_Ns <- function(data_studies_df, inf_manual_data_df) {
   saveRDS(out, file_name)
   out
 }
-
+# trimmed
 calculate_total_and_group_Ns_for_trimmed <-  function(data_studies_df, inf_manual_data_df) {
     data_available_df <- data_studies_df
     
@@ -247,7 +248,7 @@ calculate_total_and_group_Ns_for_trimmed <-  function(data_studies_df, inf_manua
     out
 }
 
-
+# full
 calculate_per_study_N_ranges_trimmed <- function(data_studies_df, inf_manual_data_df) {
   
   # -----------------------------
@@ -407,8 +408,7 @@ calculate_per_study_N_ranges_trimmed <- function(data_studies_df, inf_manual_dat
   saveRDS(out, file_name)
   out
 }
-
-
+# trimmed
 calculate_per_study_N_ranges_full <- function(data_studies_df, inf_manual_data_df) {
   
   # -----------------------------

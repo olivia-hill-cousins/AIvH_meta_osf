@@ -72,11 +72,11 @@ list(
       "fourlvl", "fourlvl_article", "threelvl_article_pID", "threelvl_pID", "threelvl_study", "threelvl_article", "threelvl", "twolvl", "twolvl_pID", "twolvl_study", "onelvl"
     )
   ), # function for model comparison is in the script "02_analysis_fit_best_model.r"
-  tar_target(twolvl_pID_vs_threelvl, compare_model_comparison_winners_anova(twolvl_pID, threelvl)), 
-  tar_target(twolvl_pID_vs_threelvl_article_pID, compare_model_comparison_winners_anova(threelvl_article_pID, twolvl_pID)),
-  tar_target(m_multi, fit_selected_model_structure(mod = NULL, full_df)),
+  tar_target(twolvl_pID_vs_threelvl, compare_model_comparison_winners_anova(twolvl_pID, threelvl)),  # full function is in "02_analysis_fit_best_model.r"
+  tar_target(twolvl_pID_vs_threelvl_article_pID, compare_model_comparison_winners_anova(threelvl_article_pID, twolvl_pID)), # full function is in "02_analysis_fit_best_model.r"
+  tar_target(m_multi, fit_selected_model_structure(mod = NULL, full_df)), # full function is in "02_analysis_fit_best_model.r"
   # see script "03_outlier_analysis.r" for functions below
-  tar_target(basic_outlier_trimmed_df, run_basic_outlier_analysis(full_df, m_multi)),
+  tar_target(basic_outlier_trimmed_df, run_basic_outlier_analysis(full_df, m_multi)), 
   tar_target(conservative_check_df, run_conservative_outlier_analysis(full_df, m_multi)),
   tar_target(outliers, create_outlier_df_to_inspect(conservative_check_df)), 
   tar_target(influence_stats_df, calculate_influential_stats(conservative_check_df, m_multi)),
@@ -106,7 +106,7 @@ list(
     read_rds_data(full_registry_file)
   ),
   tar_target(method_counts, summary_manual_calc_methods(full_registry)), # see "data_summary.R" script
-  tar_target(outlier_class_distrib, plot_outlier_classification_distribution(conservative_check_df, m_multi)),
+  tar_target(outlier_class_distrib, plot_outlier_classification_distribution(conservative_check_df, m_multi)), # full function is in "03_outlier_analysis.r"
   tar_target(outlier_class_distrib_plot,
     {
       dir.create("figures/", showWarnings = FALSE, recursive = TRUE)
@@ -122,8 +122,8 @@ list(
     },
     format = "file"
   ),
-  tar_target(trimmed_df, remove_verified_outliers(full_df)),
-  tar_target(partial_trimmed_df, remove_conservative_verified_outliers(full_df)), 
+  tar_target(trimmed_df, remove_verified_outliers(full_df)), # full function is in "03_outlier_analysis.r"
+  tar_target(partial_trimmed_df, remove_conservative_verified_outliers(full_df)), # full function is in "03_outlier_analysis.r"
   
   ###########################
   # MAIN MODEL W. TRIMMED DATA
@@ -145,29 +145,29 @@ list(
       "fourlvl_trimmed", "fourlvl_trimmed_article", "threelvl_trimmed_article_pID", "threelvl_trimmed_pID", "threelvl_trimmed_study", "threelvl_trimmed_article", "threelvl_trimmed", "twolvl_trimmed", "twolvl_trimmed_pID", "twolvl_trimmed_study", "onelvl_trimmed"
     )
   ),
-  tar_target(twolvl_trimmed_pID_vs_threelvl_trimmed, compare_model_comparison_winners_anova(twolvl_trimmed_pID, threelvl_trimmed)),
-  tar_target(twolvl_trimmed_pID_vs_threelvl_trimmed_article_pID, compare_model_comparison_winners_anova(threelvl_trimmed_article_pID, twolvl_trimmed_pID)),
-  tar_target(m_multi_trimmed, fit_selected_model_structure(mod = NULL, trimmed_df)),
+  tar_target(twolvl_trimmed_pID_vs_threelvl_trimmed, compare_model_comparison_winners_anova(twolvl_trimmed_pID, threelvl_trimmed)), # full function is in "02_analysis_fit_best_model.r"
+  tar_target(twolvl_trimmed_pID_vs_threelvl_trimmed_article_pID, compare_model_comparison_winners_anova(threelvl_trimmed_article_pID, twolvl_trimmed_pID)), # full function is in "02_analysis_fit_best_model.r"
+  tar_target(m_multi_trimmed, fit_selected_model_structure(mod = NULL, trimmed_df)), # full function is in "02_analysis_fit_best_model.r"
   ###########################
   # PUBLICATION BIAS
   ###########################
   ############### full model
   ######## pet test
-  tar_target(pet_full_model, fit_selected_model_structure(mod = ~ sqrt(vi), dat = full_df)),
+  tar_target(pet_full_model, fit_selected_model_structure(mod = ~ sqrt(vi), dat = full_df)), # full function is in "02_analysis_fit_best_model.r"
   ######## peese test
-  tar_target(peese_full_model, fit_selected_model_structure(mod = ~vi, dat = full_df)),
+  tar_target(peese_full_model, fit_selected_model_structure(mod = ~vi, dat = full_df)), # full function is in "02_analysis_fit_best_model.r"
 
   ############### trimmed model
   ######## pet test
-  tar_target(pet_trimmed_model, fit_selected_model_structure(mod = ~ sqrt(vi), dat = trimmed_df)),
+  tar_target(pet_trimmed_model, fit_selected_model_structure(mod = ~ sqrt(vi), dat = trimmed_df)), # full function is in "02_analysis_fit_best_model.r"
   ######## peese test
-  tar_target(peese_trimmed_model, fit_selected_model_structure(mod = ~vi, dat = trimmed_df)),
+  tar_target(peese_trimmed_model, fit_selected_model_structure(mod = ~vi, dat = trimmed_df)), # full function is in "02_analysis_fit_best_model.r"
   
   ############# partial trimmed model 
   ########### pet test
-  tar_target(pet_partial_trimmed_model, fit_selected_model_structure(mod = ~ sqrt(vi), dat = partial_trimmed_df)),
+  tar_target(pet_partial_trimmed_model, fit_selected_model_structure(mod = ~ sqrt(vi), dat = partial_trimmed_df)), # full function is in "02_analysis_fit_best_model.r"
   ######## peese test
-  tar_target(peese_partial_trimmed_model, fit_selected_model_structure(mod = ~vi, dat = partial_trimmed_df)),
+  tar_target(peese_partial_trimmed_model, fit_selected_model_structure(mod = ~vi, dat = partial_trimmed_df)), # full function is in "02_analysis_fit_best_model.r"
   
   ###########################
   # MODEL FIT
@@ -178,29 +178,29 @@ list(
     mod_pid_efid = threelvl_pID,
     file = "figures/profilePlot_full.png",
     fig_title = "Profile Likelihood Plots of the Variance Components in the Full 3-level Models"
-  )),
+  )), # see script: "04_check_model_fit.r" for full function
   tar_target(trimmed_data_profile_plot, make_profile_plot(
     mod_article_pid = threelvl_trimmed_article_pID,
     mod_study_pid = threelvl_trimmed,
     mod_pid_efid = threelvl_trimmed_pID,
     file = "figures/profilePlot_trimmed.png",
     fig_title = "Profile Likelihood Plots of the Variance Components in the Trimmed 3-level Models"
-  )),
+  )), # see script: "04_check_model_fit.r" for full function
   ###########################
   # I2
   ###########################
   # full data
-  tar_target(full_data_i2, run_i2_test(m_multi, "full_data_i2_table.html", "full_data_i2_plot.png")),
+  tar_target(full_data_i2, run_i2_test(m_multi, "full_data_i2_table.html", "full_data_i2_plot.png")), # see script: "05_pub_bias.r" for full function
   # trimmed data
-  tar_target(trimmed_data_i2, run_i2_test(m_multi_trimmed, "trimmed_data_i2_table.html", "trimmed_data_i2_plot.png")),
+  tar_target(trimmed_data_i2, run_i2_test(m_multi_trimmed, "trimmed_data_i2_table.html", "trimmed_data_i2_plot.png")), # see script: "05_pub_bias.r" for full function
 
   ###########################
   # CATEGORICAL MODS
   ###########################
-
+  # see script: "06_mod_analyses.r" to view the "run_meta_analysis" function used below
   ### Full data
   ## Harm
-  tar_target(harm_mv, run_meta_analysis(full_df, "harm", "cat")),
+  tar_target(harm_mv, run_meta_analysis(full_df, "harm", "cat")), 
   ## Inaction
   tar_target(in_action_mv, run_meta_analysis(full_df, "in_action", "cat")),
   ## Intent
@@ -233,7 +233,7 @@ list(
   ###########################
   # CONTINUOUS MODS
   ###########################
-
+  # see script: "06_mod_analyses.r" to view the "run_meta_analysis" function used below
   ### Full Data
   ## Responsible
   tar_target(responsible_mv, run_meta_analysis(full_df, "responsible", "cont")),
@@ -242,7 +242,7 @@ list(
   ## PMC
   tar_target(pmc_mv, run_meta_analysis(full_df, "PMC", "cont")),
   ## RQ
-  tar_target(rqz_df, make_cont_mods_z_score(full_df, "RQ")),
+  tar_target(rqz_df, make_cont_mods_z_score(full_df, "RQ")), # see script: "06_mod_analyses.r" for full function
   tar_target(rq_mv, run_meta_analysis(rqz_df, "RQ", "cont")),
 
   ### Trimmed Data
@@ -253,14 +253,14 @@ list(
   ## PMC
   tar_target(pmc_trimmed_mv, run_meta_analysis(trimmed_df, "PMC", "cont")),
   ## RQ
-  tar_target(rqz_trimmed_df, make_cont_mods_z_score(trimmed_df, "RQ")),
+  tar_target(rqz_trimmed_df, make_cont_mods_z_score(trimmed_df, "RQ")), # see script: "06_mod_analyses.r" for full function
   tar_target(rq_trimmed_mv, run_meta_analysis(rqz_trimmed_df, "RQ", "cont")),
 
 
   ###########################
   # MULTIPLE REGRESSION MODS
   ###########################
-
+  # see script: "06_mod_analyses.r" to view the "run_meta_analysis" function used below
   ### Full Data
   ## PMA + AI Type A
   tar_target(pma_aiTypeA_mv, run_meta_analysis(full_df, mod_col = c("PMA", "aiType_a"), data_type = c("cont", "cat"))),
@@ -285,7 +285,7 @@ list(
   ## PMC + responsible
   tar_target(pmc_responsible_mv, run_meta_analysis(full_df, mod_col = c("PMC", "responsible"), data_type = c("cont", "cont"))),
   ## Intent + Inaction
-  tar_target(intent_in_action_mv, run_multi_mod_meta_analysis(full_df, mod_col = c("intent", "in_action"), data_type = c("cat", "cat"))),
+  tar_target(intent_in_action_mv, run_multi_mod_meta_analysis(full_df, mod_col = c("intent", "in_action"), data_type = c("cat", "cat"))), 
   ## Intent + Responsible
   tar_target(intent_responsible_mv, run_meta_analysis(full_df, mod_col = c("intent", "responsible"), data_type = c("cat", "cont"))),
   ## Responsible Categorical Levels + Responsible
@@ -325,6 +325,7 @@ list(
   ###########################
   # PWR SENS ANALYSES
   ###########################
+  # see script: "07_pwr_sens.r" for all functions used to conduct power sensitivity analyses
   tar_target(mdes_main_full, find_mdes_main(full_df, m_multi, nsim = 500, seed = 123, tol = 0.001)),
   tar_target(mdes_main_trimmed, find_mdes_main(trimmed_df, m_multi_trimmed, nsim = 500, seed = 123, tol = 0.001)),
 
@@ -334,7 +335,7 @@ list(
 
   ### Full data
   ## Harm
-  tar_target(mdes_harm_harm, find_mdes_level(full_df, harm_mv, "harm", "harm", nsim = 500)),
+  tar_target(mdes_harm_harm, find_mdes_level(full_df, harm_mv, "harm", "harm", nsim = 500)), 
   tar_target(mdes_harm_notharm, find_mdes_level(full_df, harm_mv, "harm", "notharm", nsim = 500)),
   #  ## In_action
   tar_target(mdes_in_action_action, find_mdes_level(full_df, in_action_mv, "in_action", "action", nsim = 500, tol = 0.001)),
@@ -417,7 +418,6 @@ list(
   # ## PMC
   tar_target(mdes_PMC, find_mdes_cont(full_df, pmc_mv, mod = "PMC", nsim = 500, seed = 123, tol = 0.001)),
   # ## Responsible
-  # tar_target(mdes_responsible_init, find_mdes_cont(full_df, responsible_mv, mod = "responsible", nsim = 500, seed = 123, tol = 0.001)),
   tar_target(mdes_responsible, find_mdes_cont(full_df, responsible_mv, mod = "responsible", nsim = 500, seed = 123, mdes_min = 0.04, mdes_max = 0.08, tol = 0.001)),
   # ## RQ
   tar_target(mdes_RQ, find_mdes_cont(rqz_df, rq_mv, mod = "RQ", nsim = 500, seed = 123, mdes_min = 0.1, mdes_max = 0.2)),
@@ -428,7 +428,6 @@ list(
   ### Trimmed data
   # ## PMA
   tar_target(trimmed_mdes_PMA, find_mdes_cont(trimmed_df, pma_trimmed_mv, mod = "PMA", nsim = 500, seed = 123, mdes_min = 0.07, mdes_max = 0.09, tol = 0.001)),
-  # tar_target(trimmed_mdes_PMA_init, find_mdes_cont(trimmed_df, pma_trimmed_mv, mod = "PMA", nsim = 500, seed = 123, tol = 0.001)),
   # ## PMC
   tar_target(trimmed_mdes_PMC, find_mdes_cont(trimmed_df, pmc_trimmed_mv, mod = "PMC", nsim = 500, seed = 123, tol = 0.001)),
   # ## Responsible
@@ -438,8 +437,8 @@ list(
   ## Responsible Cat Levels x Responsible
   tar_target(trimmed_mdes_responsible_with_catLvls, find_mdes_cont_multi_mods(df = trimmed_df, model = responsibleCat_responsible_trimmed_mv, mod = "responsible", nsim = 500, seed = 123, mdes_min = 0.02, mdes_max = 0.045, tol = 0.001)),
 
-
   ### Combined MDES Stuff
+  # see script: "07_pwr_sens.r" for all functions used to organise, display etc. power sensitivity analyses outputs
   tar_target(full_mdes_all, combine_mdes_results(
     mdes_main_full,
     # harm mod
@@ -564,6 +563,7 @@ list(
   # ###########################
   # CALCULATE TOAST
   ###########################
+  # see script: "08_toast.r" for the full functions used below
   tar_target(fullToast_mdes, calc_main_toast(1, m_multi, mdes_main_full, "Full")),
   tar_target(trimmedToast_mdes, calc_main_toast(1, m_multi_trimmed, mdes_main_trimmed, "Trimmed")),
   tar_target(fullToast, calc_main_toast_fixed_bounds(1, m_multi, 0.2, "Full")),
@@ -593,7 +593,6 @@ list(
   tar_target(fullToast_aiTypeA_ai, calc_toast("AI", aiType_a_mv, mdes_aiTypeA_ai, "Full AI Type A AI", "aiType_a")),
   # # Robot level
   tar_target(fullToast_aiTypeA_robot, calc_toast("robot", aiType_a_mv, mdes_aiTypeA_robot, "Full AI Type A Robot", "aiType_a")),
-  #
   ## AI Type B (AI vs. Mechanical Robot vs. Humanoid Robot)
   # AI level
   tar_target(fullToast_aiTypeB_ai, calc_toast("AI", aiType_b_mv, mdes_aiTypeB_ai, "Full AI Type B AI", "aiType_b")),
@@ -720,14 +719,14 @@ list(
     "threelvl",
     "twolvl_pID",
     "onelvl"
-  )),
+  )), # full function is in "02_analysis_fit_best_model.r"
   tar_target(model_fit_table, create_model_fit_table(
     "threelvl_trimmed_article_pID",
     "threelvl_trimmed_pID",
     "threelvl_trimmed",
     "twolvl_trimmed_pID",
     "onelvl_trimmed"
-  )),
+  )), # full function is in "02_analysis_fit_best_model.r"
   tar_target(dv_syn_table, create_k_dv_syn_sum_table(dv_synonym_trimmed_mv)), # function in "tables.r" script
   tar_target(dv_syn_table_full, create_k_dv_syn_sum_table(dv_synonym_mv)), # function in "tables.r" script
   tar_target(TOST_dv_syn_table, create_TOST_dv_syn_sum_table(
@@ -760,29 +759,30 @@ list(
   ###########################
   # FIGURES
   ###########################
-  tar_target(funnel_es_trimmed, three_funnel(trimmed_df, "funnel_es_trimmed")),
-  tar_target(funnel_es_full, three_funnel(full_df, "funnel_es_full")),
-  tar_target(funnel_study_trimmed, three_funnel_study(trimmed_df, "funnel_study_trimmed")),
-  tar_target(funnel_study_full, three_funnel_study(full_df, "funnel_study_full")),
-  tar_target(orchard_pub_bias_full, make_orchard_pub_bias_plot(m_multi, full_data_i2, "orchard_pub_bias_full")),
-  tar_target(orchard_pub_bias_trimmed, make_orchard_pub_bias_plot(m_multi_trimmed, trimmed_data_i2, "orchard_pub_bias_trimmed")),
-  tar_target(orchard_egger_reg_full, make_orchard_egger_reg_plot(m_multi, full_df, "orchard_egger_reg_full")),
-  tar_target(orchard_egger_reg_trimmed, make_orchard_egger_reg_plot(m_multi_trimmed, trimmed_df, "orchard_egger_reg_trimmed")),
-  tar_target(forest_subsets, create_forest_subsets(trimmed_df)),
+  tar_target(funnel_es_trimmed, three_funnel(trimmed_df, "funnel_es_trimmed")), # see script: "05_pub_bias.r" for full function
+  tar_target(funnel_es_full, three_funnel(full_df, "funnel_es_full")), # see script: "05_pub_bias.r" for full function
+  tar_target(funnel_study_trimmed, three_funnel_study(trimmed_df, "funnel_study_trimmed")), # see script: "05_pub_bias.r" for full function
+  tar_target(funnel_study_full, three_funnel_study(full_df, "funnel_study_full")), # see script: "05_pub_bias.r" for full function
+  tar_target(orchard_pub_bias_full, make_orchard_pub_bias_plot(m_multi, full_data_i2, "orchard_pub_bias_full")), # see script: "05_pub_bias.r" for full function
+  tar_target(orchard_pub_bias_trimmed, make_orchard_pub_bias_plot(m_multi_trimmed, trimmed_data_i2, "orchard_pub_bias_trimmed")), # see script: "05_pub_bias.r" for full function
+  tar_target(orchard_egger_reg_full, make_orchard_egger_reg_plot(m_multi, full_df, "orchard_egger_reg_full")), # see script: "05_pub_bias.r" for full function
+  tar_target(orchard_egger_reg_trimmed, make_orchard_egger_reg_plot(m_multi_trimmed, trimmed_df, "orchard_egger_reg_trimmed")), # see script: "05_pub_bias.r" for full function
+  tar_target(forest_subsets, create_forest_subsets(trimmed_df)), # see script: "09_forest_plots.r" for full function
   tar_target(forest_df, "tables/forest_df.csv", format = "file"),
   tar_target(first_forest_subset, create_forest_plot_for_subset(forest_subsets[["first_studies"]], "first_forest_subset_a4", forest_df,
     plot_title = "Forest Plot", return_summary = FALSE, "first"
-  )),
+  )), # see script: "09_forest_plots.r" for full function
   tar_target(second_forest_subset, create_forest_plot_for_subset(forest_subsets[["second_studies"]], "second_forest_subset_a4", forest_df,
     plot_title = "Forest Plot", return_summary = FALSE, "second"
-  )),
+  )), # see script: "09_forest_plots.r" for full function
   tar_target(third_forest_subset, create_forest_plot_for_subset(forest_subsets[["third_studies"]], "third_forest_subset_a4", forest_df,
     plot_title = "Forest Plot", return_summary = FALSE, "last", m_multi, m_multi_trimmed
-  )),
-  tar_target(pmc_orchard_plot_full, make_orchard_plot_for_cont(full_df, pmc_mv, "PMC", "pmc_orchard_plot_full")),
-  tar_target(pma_orchard_plot_full, make_orchard_plot_for_cont(full_df, pma_mv, "PMA", "pma_orchard_plot_full")),
+  )), # see script: "09_forest_plots.r" for full function
+  # see script: "06_mod_analyses.r" to view the "run_meta_analysis" function used below
+  tar_target(pmc_orchard_plot_full, make_orchard_plot_for_cont(full_df, pmc_mv, "PMC", "pmc_orchard_plot_full")), 
+  tar_target(pma_orchard_plot_full, make_orchard_plot_for_cont(full_df, pma_mv, "PMA", "pma_orchard_plot_full")), 
   tar_target(responsible_orchard_plot_full, make_orchard_plot_for_cont(full_df, responsible_mv, "responsible", "responsible_orchard_plot_full")),
-  tar_target(rq_orchard_plot_full, make_orchard_plot_for_cont(rqz_df, rq_mv, "RQ", "rq_orchard_plot_full")),
+  tar_target(rq_orchard_plot_full, make_orchard_plot_for_cont(rqz_df, rq_mv, "RQ", "rq_orchard_plot_full")), 
   tar_target(rq_distribution_plot_full, create_distribution_plot_for_rq(full_df, "RQ")),
   tar_target(harm_orchard_plot_full, create_orchard_plot_for_cat_mods(harm_mv, "harm", "harm_orchard_plot_full")),
   tar_target(intent_orchard_plot_full, create_orchard_plot_for_cat_mods(intent_mv, "intent", "intent_orchard_plot_full")),

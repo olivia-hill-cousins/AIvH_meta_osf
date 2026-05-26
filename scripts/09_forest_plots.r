@@ -1,3 +1,4 @@
+# *Note* "subsets" are nothing meaningful...just a way of roughly splitting the data to spread it across A4 pages 
 create_forest_subsets <- function(forest_df) {
   forest_df <- forest_df %>%
     # 1️⃣ Build APA reference + study number + dv_var_cap

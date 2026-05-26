@@ -542,7 +542,8 @@ create_model_fit_table <- function(threelvl_article_pID,
                                    threelvl_pID,
                                    threelvl,
                                    twolvl_pID,
-                                   onelvl) {
+                                   onelvl) 
+  {
   message(
     "\nIMPORTANT: these values are calculated manually. If this message shows, please re-run the compare_performance() outside of the workflow in the 02_analysis_fit_best_model.r script instead.\n"
   )
