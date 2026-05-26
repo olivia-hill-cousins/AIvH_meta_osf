@@ -97,15 +97,15 @@ list(
   tar_target(influence_outliers_table, create_influence_table(influence_stats_df)), # function in "tables.r" script
   ##### data summary
   tar_target(
-    full_registry_file,
-    "outputs/full_registry.rds",
+    method_counts_file,
+    "outputs/method_counts.rds",
     format = "file"
   ),
   tar_target(
-    full_registry,
-    read_rds_data(full_registry_file)
-  ),
-  tar_target(method_counts, summary_manual_calc_methods(full_registry)), # see "data_summary.R" script
+    method_counts,
+    readRDS(method_counts_file)
+  ), # this code reads in the method_counts.rds which differs from how this file was contrived originally: tar_target(method_counts, summary_manual_calc_methods(full_registry)),... see "data_summary.R" script
+  # this change was made as the original code required access to data that cannot be shared due to data privacy
   tar_target(outlier_class_distrib, plot_outlier_classification_distribution(conservative_check_df, m_multi)), # full function is in "03_outlier_analysis.r"
   tar_target(outlier_class_distrib_plot,
     {

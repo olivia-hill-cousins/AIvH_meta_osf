@@ -276,7 +276,6 @@ rq_df|stem|6b9383ab822b63ef|8795b90f1aa7942c|2c530c1562a7fbd1|-410916018|docs/RQ
 full_registry_file|stem|76104d6b6b04fc26|d30e152892ab9db5|2c530c1562a7fbd1|1805489288|outputs/full_registry.rds|t20542.4317333359s|s2226524b|2226524|file|local|vector|||2.104|package ‘tidyr’ was built under R version 4.4.3. package ‘dplyr’ was built under R version 4.4.3. package ‘purrr’ was built under R version 4.4.3. package ‘rlang’ was built under R version 4.4.3. package ‘ggplot2’ was built under R version 4.4.3. package ‘tibble’ was built under R version 4.4.3. package ‘viridisLite’ was built under R version 4.4.3. package ‘emmeans’ was built under R version 4.4.3|
 full_registry|stem|76104d6b6b04fc26|c1e53c8a0692c3fd|56eb8d2b7c731667|1936501076||t20563.4170941788s|s2226524b|2226524|rds|local|vector|||0.222||
 twolvl_pID|stem|9f18cf6c2bcc345d|34c1f0ea7d7bbe88|abdcaaed68227690|502195194||t20563.4170953151s|s89859b|89859|rds|local|vector|||0.758||
-method_counts|stem|09b2084020d7b037|9c73e20c5f59f338|00102d120c9b72e1|1855678367||t20563.4170960345s|s208b|208|rds|local|vector|||0.027||
 pma_mv|stem|45946b686f7bbff0|5a30d9a49d3abda2|4fef7cf8dbb15f00|1501433540||t20563.4171291928s|s228895b|228895|rds|local|vector|||3.646||
 pma_responsible_mv|stem|14bf7ec1d450ede8|653c0ecb9f09c6cb|4fef7cf8dbb15f00|1983492739||t20563.4171321694s|s212915b|212915|rds|local|vector|||3.018||
 pma_aiTypeA_mv|stem|7e7120c909199fef|603f5086d4f49fee|4fef7cf8dbb15f00|1132288566||t20563.4171358796s|s232322b|232322|rds|local|vector|||3.394||
@@ -641,7 +640,7 @@ clean_sundvall2023_s2.3|function|abf5341e63329b5b
 clean_banks2021_s1|function|9180806baa658dea
 clean_banks2021_s2|function|ab57b9f842e23d8e
 create_mod_df_table|function|abc7864e4926c389
-.Random.seed|object|91aaebf9fb15a131
+.Random.seed|object|1ac80190b74e19f0
 make_harm_ai_subset_maninger2022_s2|function|eaa3a82ebef28657
 calc_es_manual|function|2c9f12fa29b6e433
 make_inaction_subset_laakasuo2023a_s1|function|8b08ddaa1f657ea1
@@ -735,3 +734,5 @@ find_mdes_cont|function|ea8c4974f11868bc
 find_mdes_cont_multi_mods|function|ae4b3f14f614ba42
 run_multi_mod_meta_analysis|function|ee19e3589653629d
 find_mdes_main|function|e31d1b9dff31224b
+method_counts_file|stem|09b2084020d7b037|b30609488e4ab07a|2c530c1562a7fbd1|449213099|outputs/method_counts.rds|t20599.5577951265s|s208b|208|file|local|vector|||2.019|package ‘tidyr’ was built under R version 4.4.3. package ‘dplyr’ was built under R version 4.4.3. package ‘purrr’ was built under R version 4.4.3. package ‘rlang’ was built under R version 4.4.3. package ‘ggplot2’ was built under R version 4.4.3. package ‘tibble’ was built under R version 4.4.3. package ‘viridisLite’ was built under R version 4.4.3. package ‘emmeans’ was built under R version 4.4.3|
+method_counts|stem|09b2084020d7b037|a782db226bf36c62|dd73dc0b356b2cb7|1855678367||t20599.5583286834s|s208b|208|rds|local|vector|||0||
