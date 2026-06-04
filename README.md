@@ -119,4 +119,4 @@ rq (or RQ) -> Research Quality Moderator
 # Citation 
 If you use or adapt this pipeline, please cite the associated preprint:
 
-> Hill-Cousins, O., Sweetman, J., & Lowe, C. J. (2026, June 4). AI vs. Humans: Does AI Face Harsher Moral Judgements? A Meta-Analysis. Retrieved from osf.io/preprints/psyarxiv/stcej_v1
+> Hill-Cousins, O., Sweetman, J., & Lowe, C. J. (2026, June 4). AI vs. Humans: Does AI Face Harsher Moral Judgements? A Meta-Analysis. Retrieved from osf.io/preprints/psyarxiv/stcej_v2
