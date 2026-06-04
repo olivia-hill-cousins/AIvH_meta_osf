@@ -54,7 +54,7 @@ Alternatively, to view a specific target (e.g. certain model), run:
 `tar_load(name_of_target)`
 
 
-For transparency, the original `_targets.R` file (without excluding raw data, is shared in this project called: og_targets_file_for_transparency)
+For transparency, the original `_targets.R` file (without excluding raw data, is shared in this project called: `og_targets_file_for_transparency.R`)
 
 
 # Moderator Variable Key
