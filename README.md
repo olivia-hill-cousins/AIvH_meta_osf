@@ -1,32 +1,38 @@
+# Folder Description
+This repository contains the full reproducible workflow, code, and supplementary materials for the meta-analysis “AI vs Humans: Does AI Face Harsher Moral Judgements? A Meta-Analysis”. 
+
+All extracted and processed meta-analytic data are located in the $data_clean/$ folder.
+
+This pipeline contains computationally heavy steps. Running the full pipeline may take several minutes depending on system resources. The targets workflow should, however, allow you to specify certain steps you want to check the output of, or even re-run. 
+
 The pipeline for this meta-analysis was developed using targets (helps make complex workflows reproducible). 
 
 # Setup
 To begin: install the package renv::
 
-install.packages("renv")
-
-library(renv)
+$install.packages("renv")
+library(renv)$
 
 Then run the function:
 
-renv::restore()
+$renv::restore()$
 
 This will ensure that all of your packages are running with the same versions used for this analysis at the time it was initially running (which should prevent any issues arising from pkg versions!)
 
 To get this running, install targets. 
 
-install.packages("targets")
+$install.packages("targets")
 
-library(targets)
+library(targets)$
 
 
 To run all targets, use the function:
 
-tar_make()
+$tar_make()$
 
 If you want to run a specific target (e.g. certain model), run:
 
-tar_make(name_of_target)
+$tar_make(name_of_target)$
 
 The name of the target is the first argument in tar_target. 
 
@@ -38,14 +44,14 @@ tar_target(full_df, read_clean_data("data_clean/full_data.csv")),
 
 Here you would run
 
-tar_make(full_df)
+$tar_make(full_df)$
 
 This will run all dependencies needed beforehand to get this one (in this case there aren't any).
 
 
 Alternatively, to view a specific target (e.g. certain model), run:
 
-tar_load(name_of_target)
+$tar_load(name_of_target)$
 
 
 For transparency, the original _targets.R file (without excluding raw data, is shared in this project called: og_targets_file_for_transparency)
@@ -82,3 +88,7 @@ og_targets_file_for_transparency.R --> the _targets.R file used for the full dat
 PRISMA_checklist_AIvH.pdf --> this is the PRISMA checklist for this meta-analysis manuscript. It includes information about where to find the information that supports each item of the PRISMA criteria. 
 
 
+# Citation 
+If you use or adapt this pipeline, please cite the associated preprint:
+
+Hill-Cousins, O; Sweetman, J; Lowe, C (2026). AI vs Humans: Does AI Face Harsher Moral Judgements? A Meta-Analysis. PsyArXiv. 
