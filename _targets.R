@@ -122,8 +122,8 @@ list(
     },
     format = "file"
   ),
-  tar_target(trimmed_df, remove_verified_outliers(full_df)), # full function is in "03_outlier_analysis.r"
-  tar_target(partial_trimmed_df, remove_conservative_verified_outliers(full_df)), # full function is in "03_outlier_analysis.r"
+  tar_target(trimmed_df, remove_verified_outliers(full_df)), # full function is in "03_outlier_analysis.r" # final dataset after removing outliers. Referred to as "trimmed dataset" in the manuscript
+  tar_target(partial_trimmed_df, remove_conservative_verified_outliers(full_df)), # full function is in "03_outlier_analysis.r" # dataset without removal of conservative outlier
   
   ###########################
   # MAIN MODEL W. TRIMMED DATA
