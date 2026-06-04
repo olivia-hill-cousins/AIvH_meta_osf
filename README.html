@@ -352,27 +352,153 @@ display: none;
 </div>
 
 
+<div id="folder-description" class="section level1">
+<h1>Folder Description</h1>
+<p>This repository contains the full reproducible workflow, code, and
+supplementary materials for the meta-analysis “AI vs Humans: Does AI
+Face Harsher Moral Judgements? A Meta-Analysis”.</p>
+<p>All extracted and processed meta-analytic data are located in the
+<code>data_clean/</code> folder.</p>
+<p>This pipeline contains computationally heavy steps. Running the full
+pipeline may take several minutes depending on system resources. The
+targets workflow should, however, allow you to specify certain steps you
+want to check the output of, or even re-run.</p>
 <p>The pipeline for this meta-analysis was developed using targets
 (helps make complex workflows reproducible).</p>
+</div>
 <div id="setup" class="section level1">
 <h1>Setup</h1>
-<p>To begin: install the package renv:: install.packages(“renv”)
-library(renv) Then run the function: renv::restore() This will ensure
-that all of your packages are running with the same versions used for
-this analysis at the time it was initially running (which should prevent
-any issues arising from pkg versions!)</p>
-<p>To get this running, install targets. install.packages(“targets”)
-library(targets)</p>
-<p>To run all targets, use the function: tar_make() If you want to run a
-specific target (e.g. certain model), run: tar_make(name_of_target) The
-name of the target is the first argument in tar_target. For instance,
-tar_target(full_df, read_clean_data(“data_clean/full_data.csv”)),
-<full_df> is the target name. Here you would run tar_make(full_df) This
-will run all dependencies needed beforehand to get this one (in this
-case there aren’t any).</p>
-<p>For transparency, the original _targets.R file (without excluding raw
-data, is shared in this project called:
-og_targets_file_for_transparency)</p>
+<p>To begin: install the package <code>renv::</code></p>
+<p><code>install.packages(&quot;renv&quot;)</code> <code>library(renv)</code></p>
+<p>Then run the function:</p>
+<p><code>renv::restore()</code></p>
+<p>This will ensure that all of your packages are running with the same
+versions used for this analysis at the time it was initially running
+(which should prevent any issues arising from pkg versions!)</p>
+<p>To get this running, install targets.</p>
+<p><code>install.packages(&quot;targets&quot;)</code></p>
+<p><code>library(targets)</code></p>
+<p>To run all targets, use the function:</p>
+<p><code>tar_make()</code></p>
+<p>If you want to run a specific target (e.g. certain model), run:</p>
+<p><code>tar_make(name_of_target)</code></p>
+<p>The name of the target is the first argument in
+<code>tar_target</code>.</p>
+<p>For instance,</p>
+<p><code>tar_target(full_df, read_clean_data(&quot;data_clean/full_data.csv&quot;))</code>,</p>
+<p><full_df> is the target name.</p>
+<p>Here you would run</p>
+<p><code>tar_make(full_df)</code></p>
+<p>This will run all dependencies needed beforehand to get this one (in
+this case there aren’t any).</p>
+<p>Alternatively, to view a specific target (e.g. certain model),
+run:</p>
+<p><code>tar_load(name_of_target)</code></p>
+<p>For transparency, the original <code>_targets.R</code> file (without
+excluding raw data, is shared in this project called:
+<code>og_targets_file_for_transparency.R</code>)</p>
+<div id="folders" class="section level2">
+<h2>Folders</h2>
+<ul>
+<li><code>_targets</code>: Critical for the target workflow, but access
+contents in the manner described above.</li>
+<li><code>data_clean/</code>: Contains data frames (post-cleaning due to
+privacy) including the full and trimmed datasets, and the data in the
+various formats used to produce different tables, figures etc. See the
+<code>_targets.R</code> file (Ctrl/Cmd + F &amp; enter the file name of
+interest verbatim) for more information about that data frame.</li>
+<li><code>docs/</code>: Includes the <code>.csv</code> file for the
+Research Quality moderator, and files containing the min-max <em>Ns</em>
+and total group <em>Ns</em></li>
+<li><code>figures/</code>: Contains all figures created (including those
+used in the manuscript).</li>
+<li><code>tables/</code>: Contains all tables created (including those
+used in the manuscript).</li>
+<li><code>outputs/</code>: Contains all remaining outputs created and
+manually saved within the targets workflow.</li>
+<li><code>renv/</code>: Critical for the functionality of
+<code>renv::</code>. This contains information about the R packages that
+are used in the workflow.</li>
+<li><code>scripts/</code>: Contains all scripts used in the entire
+workflow. The <code>_targets.R</code> file signposts to the specific
+script that contains the function used to create any target of interest.
+<ul>
+<li><code>00_clean_functions.r</code>: all functions used to clean the
+original datasets. These are not used in the provided targets workflow.
+The provided targets workflow does not use/provide any raw data from the
+original studies included in this meta-analysis due to data privacy
+restrictions. This script is included however so that one can check the
+coding logic etc.</li>
+<li><code>01_analysis.r</code>: functions used to conduct the overall
+effect analyses</li>
+<li><code>02_analysis_fit_best_model.r</code>: functions used to conduct
+model comparison analyses to choose the best model</li>
+<li><code>03_outlier_analysis.r</code>: functions used for the outlier
+analysis section</li>
+<li><code>04_check_model_fit.r</code>: functions for profile plots</li>
+<li><code>05_pub_bias.r</code>: functions for publication bias
+analyses</li>
+<li><code>06_mod_analyses.r</code>: functions for all moderator
+analyses</li>
+<li><code>07_pwr_sens.r</code>: functions used to conduct the power
+sensitivity analyses</li>
+<li><code>08_toast.r</code>: functions used to conduct TOST analyses for
+overall and moderator effects</li>
+<li><code>09_forest_plots.r</code>: functions used to create the forest
+plots</li>
+<li><code>data_summary.r</code>: functions used to calculate all data
+summary statistics</li>
+<li><code>tables.r</code>: functions used to create all tables
+(including those used in the manuscript)</li>
+</ul></li>
+</ul>
+<div id="main-targets-of-interest" class="section level3">
+<h3>Main Targets of Interest</h3>
+<p>Full dataset: <code>tar_load(full_df)</code></p>
+<p>Trimmed dataset: <code>tar_load(trimmed_df)</code></p>
+</div>
+</div>
+</div>
+<div id="moderator-variable-key" class="section level1">
+<h1>Moderator Variable Key</h1>
+<p>harm -&gt; Moral Domain</p>
+<p>in_action -&gt; Decision Type</p>
+<p>intent -&gt; Intent</p>
+<p>agent_intel -&gt; Implications (or lack thereof) of the AI Agent’s
+intelligence</p>
+<p>aiType_a (or aiTypeA) -&gt; Two-Category Operationalisation of AI: AI
+System and Robot</p>
+<p>aiType_b (or aiTypeB) -&gt; Three-Category Operationalisation of AI:
+AI System and Mechanical Robot and Humanoid Robot</p>
+<p>dv_synonym -&gt; Wording of DV</p>
+<p>pma (or PMA) -&gt; Perceptions of Moral Agency</p>
+<p>pmc (or PMC) -&gt; Perceptions of Moral Capacity</p>
+<p>responsible -&gt; Responsibility Attributions</p>
+<p>rq (or RQ) -&gt; Research Quality Moderator</p>
+</div>
+<div id="additional-files-key" class="section level1">
+<h1>Additional Files Key</h1>
+<p><code>supplementary_materials_AIvH.pdf</code> –&gt; the supplementary
+materials document. This complements the manuscript and includes
+additional analyses, tables formatted according to APA.</p>
+<p><code>og_targets_file_for_transparency.R</code> –&gt; the _targets.R
+file used for the full data extraction and analysis process. It is the
+version used with the authors’ data. It is shared here for transparency
+as it is not possible to actually share authors’ data due to data
+privacy constraints etc.</p>
+<p><code>PRISMA_checklist_AIvH.pdf</code> –&gt; this is the PRISMA
+checklist for this meta-analysis manuscript. It includes information
+about where to find the information that supports each item of the
+PRISMA criteria.</p>
+</div>
+<div id="citation" class="section level1">
+<h1>Citation</h1>
+<p>If you use or adapt this pipeline, please cite the associated
+preprint:</p>
+<blockquote>
+<p>Hill-Cousins, O; Sweetman, J; Lowe, C (2026). AI vs Humans: Does AI
+Face Harsher Moral Judgements? A Meta-Analysis. PsyArXiv.</p>
+</blockquote>
 </div>
 
 

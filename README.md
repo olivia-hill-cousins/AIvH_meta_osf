@@ -65,22 +65,23 @@ For transparency, the original `_targets.R` file (without excluding raw data, is
 - `outputs/`: Contains all remaining outputs created and manually saved within the targets workflow.
 - `renv/`: Critical for the functionality of `renv::`. This contains information about the R packages that are used in the workflow. 
 - `scripts/`: Contains all scripts used in the entire workflow. The `_targets.R` file signposts to the specific script that contains the function used to create any target of interest. 
-  - `00_clean_functions.r`: all functions used to clean the original datasets. These are not used in the provided targets workflow. The provided targets workflow does not use/provide any raw data from the original studies included in this meta-analysis due to data privacy restrictions. This script is included however so that one can check the coding logic etc.
-  - `01_analysis.r`: functions used to conduct the overall effect analyses
-  - `02_analysis_fit_best_model.r`: functions used to conduct model comparison analyses to choose the best model
-  - `03_outlier_analysis.r`: functions used for the outlier analysis section
-  - `04_check_model_fit.r`: functions for profile plots
-  - `05_pub_bias.r`: functions for publication bias analyses
-  - `06_mod_analyses.r`: functions for all moderator analyses
-  - `07_pwr_sens.r`: functions used to conduct the power sensitivity analyses
-  - `08_toast.r`: functions used to conduct TOST analyses for overall and moderator effects
-  - `09_forest_plots.r`: functions used to create the forest plots
-  - `data_summary.r`: functions used to calculate all data summary statistics 
-  - `tables.r`: functions used to create all tables (including those used in the manuscript)
+    - `00_clean_functions.r`: all functions used to clean the original datasets. These are not used in the provided targets workflow. The provided targets workflow does not use/provide any raw data from the original studies included in this meta-analysis due to data privacy restrictions. This script is included however so that one can check the coding logic etc.
+    - `01_analysis.r`: functions used to conduct the overall effect analyses
+    - `02_analysis_fit_best_model.r`: functions used to conduct model comparison analyses to choose the best model
+    - `03_outlier_analysis.r`: functions used for the outlier analysis section
+    - `04_check_model_fit.r`: functions for profile plots
+    - `05_pub_bias.r`: functions for publication bias analyses
+    - `06_mod_analyses.r`: functions for all moderator analyses
+    - `07_pwr_sens.r`: functions used to conduct the power sensitivity analyses
+    - `08_toast.r`: functions used to conduct TOST analyses for overall and moderator effects
+    - `09_forest_plots.r`: functions used to create the forest plots
+    - `data_summary.r`: functions used to calculate all data summary statistics 
+    - `tables.r`: functions used to create all tables (including those used in the manuscript)
   
 ### Main Targets of Interest
 Full dataset:
 `tar_load(full_df)`
+
 Trimmed dataset:
 `tar_load(trimmed_df)`
 
