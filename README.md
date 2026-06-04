@@ -74,4 +74,11 @@ responsible -> Responsibility Attributions
 
 rq (or RQ) -> Research Quality Moderator
 
+# Additional Files Key
+supplementary_materials_AIvH.pdf --> the supplementary materials document. This complements the manuscript and includes additional analyses, tables formatted according to APA. 
+
+og_targets_file_for_transparency.R --> the _targets.R file used for the full data extraction and analysis process. It is the version used with the authors' data. It is shared here for transparency as it is not possible to actually share authors' data due to data privacy constraints etc.
+
+PRISMA_checklist_AIvH.pdf --> this is the PRISMA checklist for this meta-analysis manuscript. It includes information about where to find the information that supports each item of the PRISMA criteria. 
+
 
